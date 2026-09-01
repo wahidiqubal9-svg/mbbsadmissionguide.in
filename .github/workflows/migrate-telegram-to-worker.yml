@@ -20,7 +20,6 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import re
 
           index = Path('index.html')
           text = index.read_text(encoding='utf-8')
@@ -131,7 +130,6 @@ export default {
         return json({ ok: false, error: 'Invalid request' }, 400);
       }
 
-      // Honeypot: silently accept obvious automated submissions.
       if (String(lead?.website || '').trim()) {
         return json({ ok: true });
       }
@@ -213,19 +211,16 @@ export default {
     "directory": ".",
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
-  },
-  "secrets": {
-    "required": ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
   }
 }
 ''', encoding='utf-8')
 
           Path('.assetsignore').write_text('worker.js\nwrangler.jsonc\n.assetsignore\n.github/\n.git/\n', encoding='utf-8')
 
-      - name: Verify no Telegram bot token is in the frontend
+      - name: Verify frontend contains no Telegram credential or API call
         run: |
           if grep -nE 'TELEGRAM_BOT_TOKEN|api\.telegram\.org/bot' index.html; then
-            echo 'Telegram credentials or direct Telegram API calls remain in index.html.'
+            echo 'Telegram credential or direct Telegram API call remains in index.html.'
             exit 1
           fi
 
@@ -235,5 +230,5 @@ export default {
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           rm -f .github/workflows/migrate-telegram-to-worker.yml
           git add index.html worker.js wrangler.jsonc .assetsignore .github/workflows/migrate-telegram-to-worker.yml
-          git commit -m "chore: migrate telegram lead handling" || exit 0
+          git commit -m "chore: migrate telegram lead handling"
           git push origin HEAD:security/remove-old-telegram-token
