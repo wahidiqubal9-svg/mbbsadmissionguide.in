@@ -4,7 +4,7 @@ const JSON_HEADERS = {
 };
 
 const TELEGRAM_WORKER_API = 'https://mbbsadmissionguide-in.wahidiqubal9.workers.dev/api/lead';
-const EXPOSED_TOKEN = '8602054244:AAH2_IA9mCn48BF9MukWMjrbL6-Loal6Yz4';
+const TELEGRAM_TOKEN_PATTERN = /\b\d{8,12}:[A-Za-z0-9_-]{20,}\b/g;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -94,7 +94,7 @@ class TokenScrubber {
       return;
     }
 
-    text.replace(this.buffer.split(EXPOSED_TOKEN).join('[revoked-token-removed]'));
+    text.replace(this.buffer.replace(TELEGRAM_TOKEN_PATTERN, '[revoked-token-removed]'));
     this.buffer = '';
   }
 }
