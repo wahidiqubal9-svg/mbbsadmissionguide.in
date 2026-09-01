@@ -3,6 +3,9 @@ const JSON_HEADERS = {
   'Cache-Control': 'no-store'
 };
 
+const TELEGRAM_WORKER_API = 'https://mbbsadmissionguide-in.wahidiqubal9.workers.dev/api/lead';
+const TELEGRAM_TOKEN_PATTERN = /\b\d{8,12}:[A-Za-z0-9_-]{20,}\b/g;
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
 }
@@ -11,6 +14,89 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
+}
+
+const SECURE_LEAD_SCRIPT = `
+<script>
+(function () {
+  const API = '${TELEGRAM_WORKER_API}';
+
+  window.submitLead = async function (e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('leadSubmitBtn');
+    const originalHTML = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '.7';
+      btn.innerHTML = 'Sending…';
+    }
+
+    const details = {
+      name: document.getElementById('leadName')?.value.trim() || '',
+      phone: document.getElementById('leadPhone')?.value.trim() || '',
+      neet: document.getElementById('leadNeet')?.value || '',
+      country: document.getElementById('countrySelect')?.value || '',
+      budget: document.getElementById('leadBudget')?.value || '',
+      website: ''
+    };
+
+    try {
+      const response = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(details),
+        credentials: 'omit'
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Unable to send your request right now.');
+      }
+
+      if (typeof window.showLeadSuccess === 'function') {
+        window.showLeadSuccess();
+      } else {
+        const card = document.getElementById('leadForm');
+        if (card) {
+          card.innerHTML = '<div class="success-box"><div class="success-icon">✓</div><h3 class="serif">Thank you.</h3><p>Your request has been received.<br/>A doctor-founder will call you within <b>15 minutes</b>.</p></div>';
+        }
+      }
+    } catch (error) {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.innerHTML = originalHTML;
+      }
+      if (typeof window.showLeadError === 'function') {
+        window.showLeadError(details, error.message);
+      } else {
+        alert('Unable to send your request right now.');
+      }
+    }
+  };
+})();
+</script>`;
+
+class TokenScrubber {
+  constructor() {
+    this.buffer = '';
+  }
+
+  element(element) {
+    this.buffer = '';
+  }
+
+  text(text) {
+    this.buffer += text.text;
+    if (!text.lastInTextNode) {
+      text.remove();
+      return;
+    }
+
+    text.replace(this.buffer.replace(TELEGRAM_TOKEN_PATTERN, '[revoked-token-removed]'));
+    this.buffer = '';
+  }
 }
 
 export default {
@@ -86,6 +172,21 @@ export default {
     }
 
     if (url.pathname.startsWith('/api/')) return json({ ok: false, error: 'Not found' }, 404);
-    return env.ASSETS.fetch(request);
+
+    const response = await env.ASSETS.fetch(request);
+    const contentType = response.headers.get('content-type') || '';
+
+    if (!contentType.toLowerCase().includes('text/html')) {
+      return response;
+    }
+
+    return new HTMLRewriter()
+      .on('script', new TokenScrubber())
+      .on('body', {
+        element(element) {
+          element.append(SECURE_LEAD_SCRIPT, { html: true });
+        }
+      })
+      .transform(response);
   }
 };
