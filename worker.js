@@ -3,6 +3,23 @@ const JSON_HEADERS = {
   'Cache-Control': 'no-store'
 };
 
+const ALLOWED_NEET = new Set(['Qualified', 'Appearing 2026', 'Not Appeared']);
+const ALLOWED_COUNTRIES = new Set([
+  'Russia',
+  'Georgia',
+  'Kazakhstan',
+  'Uzbekistan',
+  'Philippines',
+  'Kyrgyzstan',
+  'Not Sure'
+]);
+const ALLOWED_BUDGETS = new Set([
+  'Under 3 Lakh',
+  '3 – 5 Lakh',
+  '5 – 8 Lakh',
+  'Above 8 Lakh'
+]);
+
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
@@ -20,9 +37,49 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function securityHeaders(headers) {
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  return headers;
+}
+
 const LEAD_SCRIPT = `
 <script>
 (function () {
+  const WHATSAPP_NUMBER = '918942954415';
+
+  function showLeadSuccess() {
+    const card = document.getElementById('leadForm');
+    if (!card) return;
+    card.innerHTML = '<div class="success-box"><div class="success-icon">✓</div><h3 class="serif">Thank you.</h3><p>Your request has been received.<br/>A doctor-founder will call you within <b>15 minutes</b>.</p></div>';
+  }
+
+  function showLeadError(details) {
+    const form = document.getElementById('leadFormEl');
+    if (!form) return;
+
+    let box = document.getElementById('leadErrorBox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'leadErrorBox';
+      box.style.cssText = 'background:#FBF1E7;border:1px solid #EBD3AE;color:#6B4A17;border-radius:10px;padding:12px;font-size:12.5px;margin-bottom:10px;line-height:1.6';
+      form.prepend(box);
+    }
+
+    const waText = encodeURIComponent(
+      'Hi, I want MBBS abroad details.\\n' +
+      'Name: ' + details.name + '\\n' +
+      'Phone: ' + details.phone + '\\n' +
+      'NEET: ' + details.neet + '\\n' +
+      'Country: ' + details.country + '\\n' +
+      'Budget: ' + details.budget
+    );
+
+    box.innerHTML = '⚠️ <b>Couldn\'t send just now.</b> Please try again, or reach us instantly:<br/><a href="https://wa.me/' + WHATSAPP_NUMBER + '?text=' + waText + '" target="_blank" rel="noopener" style="color:#0E7C5B;font-weight:700;text-decoration:underline">Continue on WhatsApp →</a>';
+  }
+
   async function submitLead(e) {
     e.preventDefault();
 
@@ -39,13 +96,15 @@ const LEAD_SCRIPT = `
       phone: document.getElementById('leadPhone')?.value.trim() || '',
       neet: document.getElementById('leadNeet')?.value || '',
       country: document.getElementById('countrySelect')?.value || '',
-      budget: document.getElementById('leadBudget')?.value || ''
+      budget: document.getElementById('leadBudget')?.value || '',
+      website: ''
     };
 
     try {
       const response = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(details)
       });
 
@@ -54,29 +113,19 @@ const LEAD_SCRIPT = `
         throw new Error(data.error || 'Unable to send your request right now.');
       }
 
-      if (typeof window.showLeadSuccess === 'function') {
-        window.showLeadSuccess();
-      } else {
-        const form = document.getElementById('leadForm');
-        if (form) {
-          form.innerHTML = '<div class="success-box"><div class="success-icon">✓</div><h3 class="serif">Thank you.</h3><p>Your request has been received.<br/>A doctor-founder will call you within <b>15 minutes</b>.</p></div>';
-        }
-      }
+      showLeadSuccess();
     } catch (error) {
       if (btn) {
         btn.disabled = false;
         btn.style.opacity = '1';
         btn.innerHTML = originalHTML;
       }
-      if (typeof window.showLeadError === 'function') {
-        window.showLeadError(details, error.message);
-      } else {
-        alert(error.message);
-      }
+      showLeadError(details);
     }
   }
 
   window.submitLead = submitLead;
+  window.showLeadSuccess = showLeadSuccess;
 })();
 </script>`;
 
@@ -86,18 +135,30 @@ export default {
 
     if (url.pathname === '/api/lead') {
       if (request.method === 'OPTIONS') {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'Access-Control-Allow-Origin': url.origin,
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-          }
+        const headers = new Headers({
+          'Access-Control-Allow-Origin': url.origin,
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '86400'
         });
+        securityHeaders(headers);
+        return new Response(null, { status: 204, headers });
       }
 
       if (request.method !== 'POST') {
-        return json({ ok: false, error: 'Method not allowed' }, 405);
+        return json({ ok: false, error: 'Method not allowed' }, 405, {
+          Allow: 'POST, OPTIONS'
+        });
+      }
+
+      const origin = request.headers.get('Origin');
+      if (origin && origin !== url.origin) {
+        return json({ ok: false, error: 'Forbidden' }, 403);
+      }
+
+      const contentType = request.headers.get('Content-Type') || '';
+      if (!contentType.toLowerCase().includes('application/json')) {
+        return json({ ok: false, error: 'Invalid request' }, 415);
       }
 
       let lead;
@@ -120,9 +181,9 @@ export default {
       if (
         !name || name.length > 100 ||
         !/^[0-9]{10}$/.test(phone) ||
-        !neet || neet.length > 50 ||
-        !country || country.length > 50 ||
-        !budget || budget.length > 50
+        !ALLOWED_NEET.has(neet) ||
+        !ALLOWED_COUNTRIES.has(country) ||
+        !ALLOWED_BUDGETS.has(budget)
       ) {
         return json({ ok: false, error: 'Please check your details and try again.' }, 400);
       }
@@ -185,18 +246,32 @@ export default {
     }
 
     const response = await env.ASSETS.fetch(request);
-
     const contentType = response.headers.get('content-type') || '';
+    const headers = securityHeaders(new Headers(response.headers));
+
     if (!contentType.includes('text/html')) {
-      return response;
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
     }
 
     return new HTMLRewriter()
+      .on('body > script:last-of-type', {
+        element(element) {
+          element.remove();
+        }
+      })
       .on('body', {
         element(element) {
           element.append(LEAD_SCRIPT, { html: true });
         }
       })
-      .transform(response);
+      .transform(new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      }));
   }
 };
