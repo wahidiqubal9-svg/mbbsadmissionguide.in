@@ -19,7 +19,6 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
@@ -30,6 +29,8 @@ jobs:
               raise SystemExit('Telegram block markers not found')
 
           replacement = '''  /* ═══ LEAD SUBMISSION ═══ */
+  const WHATSAPP_NUMBER = '918942954415';
+
   async function submitLead(e){
     e.preventDefault();
     const btn = document.getElementById('leadSubmitBtn');
@@ -89,9 +90,8 @@ jobs:
 '''
           s = s[:start] + replacement + s[end:]
 
-          # Add a honeypot field to the form if it isn't already there.
-          marker = '        <form id="leadFormEl" onsubmit="submitLead(event)">\\n'
-          honeypot = '          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website <input type="text" id="leadWebsite" name="website" tabindex="-1" autocomplete="off"></label></div>\\n'
+          marker = '        <form id="leadFormEl" onsubmit="submitLead(event)">\n'
+          honeypot = '          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website <input type="text" id="leadWebsite" name="website" tabindex="-1" autocomplete="off"></label></div>\n'
           if 'id="leadWebsite"' not in s:
               if marker not in s:
                   raise SystemExit('Lead form marker not found')
@@ -100,14 +100,23 @@ jobs:
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Verify no Telegram secret remains in frontend
+      - name: Verify frontend and worker syntax
         run: |
           if grep -nE 'TELEGRAM_BOT_TOKEN|api\.telegram\.org/bot|TELEGRAM_CHAT_ID' index.html; then
             echo 'ERROR: Telegram secret/API reference remains in index.html'
             exit 1
           fi
           node --check worker.js
-          node --check <(sed -n '/<script>/,/<\/script>/p' index.html | sed '1d;$d')
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          start=s.find('<script>')+len('<script>')
+          end=s.rfind('</script>')
+          if start < len('<script>') or end < 0:
+              raise SystemExit('script block not found')
+          Path('/tmp/frontend.js').write_text(s[start:end], encoding='utf-8')
+          PY
+          node --check /tmp/frontend.js
 
       - name: Commit migration
         run: |
