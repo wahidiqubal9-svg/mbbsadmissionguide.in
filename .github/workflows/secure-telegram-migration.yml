@@ -1,4 +1,0 @@
-name: Secure Telegram migration
-
-# Temporary migration workflow removed.
-# Telegram credentials are managed only as Cloudflare Worker secrets.
