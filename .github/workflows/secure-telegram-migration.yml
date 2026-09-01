@@ -12,32 +12,31 @@ jobs:
   migrate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = 'security/remove-old-telegram-token';
+            const path = 'index.html';
+            const file = await github.rest.repos.getContent({ owner, repo, path, ref: branch });
+            const sha = file.data.sha;
+            let html = Buffer.from(file.data.content, 'base64').toString('utf8');
 
-      - name: Replace exposed Telegram frontend code
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
+            const startMarker = '  /* ═══ TELEGRAM CONFIG ═══ */';
+            const endMarker = '  /* ═══ UI ═══ */';
+            const start = html.indexOf(startMarker);
+            const end = html.indexOf(endMarker, start);
+            if (start < 0 || end < 0) throw new Error('Telegram block markers not found');
 
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-
-          start = s.find('  /* ═══ TELEGRAM CONFIG ═══ */')
-          end = s.find('  /* ═══ UI ═══ */', start)
-          if start < 0 or end < 0:
-              raise SystemExit('Telegram block markers not found')
-
-          replacement = '''  /* ═══ LEAD SUBMISSION ═══ */
+            const replacement = `  /* ═══ LEAD SUBMISSION ═══ */
   const WHATSAPP_NUMBER = '918942954415';
 
   async function submitLead(e){
     e.preventDefault();
     const btn = document.getElementById('leadSubmitBtn');
     const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.style.opacity = '.7';
-    btn.innerHTML = 'Sending…';
+    btn.disabled = true; btn.style.opacity = '.7'; btn.innerHTML = 'Sending…';
 
     const details = {
       name: document.getElementById('leadName').value.trim(),
@@ -48,81 +47,55 @@ jobs:
       website: document.getElementById('leadWebsite')?.value || ''
     };
 
-    try{
-      const res = await fetch('/api/lead', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(details)
-      });
+    try {
+      const res = await fetch('/api/lead', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(details) });
       const data = await res.json().catch(() => ({}));
       if(!res.ok || !data.ok) throw new Error(data.error || 'Unable to submit your request.');
       showLeadSuccess();
-    }catch(err){
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.innerHTML = originalHTML;
+    } catch(err) {
+      btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = originalHTML;
       showLeadError(details, err.message);
     }
   }
 
   function showLeadSuccess(){
-    document.getElementById('leadForm').innerHTML = `
-      <div class="success-box">
-        <div class="success-icon">✓</div>
-        <h3 class="serif">Thank you.</h3>
-        <p>Your request has been received.<br/>A doctor-founder will call you within <b>15 minutes</b>.</p>
-      </div>`;
+    document.getElementById('leadForm').innerHTML = \
+      '<div class="success-box"><div class="success-icon">✓</div><h3 class="serif">Thank you.</h3><p>Your request has been received.<br/>A doctor-founder will call you within <b>15 minutes</b>.</p></div>';
   }
 
   function showLeadError(d, reason){
     let box = document.getElementById('leadErrorBox');
     if(!box){
-      box = document.createElement('div');
-      box.id = 'leadErrorBox';
-      box.style.cssText = 'background:#FBF1E7;border:1px solid #EBD3AE;color:#6B4A17;border-radius:10px;padding:12px;font-size:12.5px;margin-bottom:10px;line-height:1.6';
+      box = document.createElement('div'); box.id='leadErrorBox';
+      box.style.cssText='background:#FBF1E7;border:1px solid #EBD3AE;color:#6B4A17;border-radius:10px;padding:12px;font-size:12.5px;margin-bottom:10px;line-height:1.6';
       document.getElementById('leadFormEl').prepend(box);
     }
-    const waText = encodeURIComponent(`Hi, I want MBBS abroad details.\\nName: ${d.name}\\nPhone: ${d.phone}\\nNEET: ${d.neet}\\nCountry: ${d.country}\\nBudget: ${d.budget}`);
-    box.innerHTML = `⚠️ <b>Couldn't send just now.</b> Please try again, or reach us instantly:
-      <br/><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${waText}" target="_blank" rel="noopener" style="color:#0E7C5B;font-weight:700;text-decoration:underline">Continue on WhatsApp →</a>`;
+    const waText = encodeURIComponent(\`Hi, I want MBBS abroad details.\\nName: \${d.name}\\nPhone: \${d.phone}\\nNEET: \${d.neet}\\nCountry: \${d.country}\\nBudget: \${d.budget}\`);
+    box.innerHTML = \`⚠️ <b>Couldn't send just now.</b> Please try again, or reach us instantly:<br/><a href="https://wa.me/\${WHATSAPP_NUMBER}?text=\${waText}" target="_blank" rel="noopener" style="color:#0E7C5B;font-weight:700;text-decoration:underline">Continue on WhatsApp →</a>\`;
   }
 
-'''
-          s = s[:start] + replacement + s[end:]
+`;
 
-          marker = '        <form id="leadFormEl" onsubmit="submitLead(event)">\n'
-          honeypot = '          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website <input type="text" id="leadWebsite" name="website" tabindex="-1" autocomplete="off"></label></div>\n'
-          if 'id="leadWebsite"' not in s:
-              if marker not in s:
-                  raise SystemExit('Lead form marker not found')
-              s = s.replace(marker, marker + honeypot, 1)
+            html = html.slice(0, start) + replacement + html.slice(end);
 
-          p.write_text(s, encoding='utf-8')
-          PY
+            const formMarker = '        <form id="leadFormEl" onsubmit="submitLead(event)">';
+            const honeypot = '          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website <input type="text" id="leadWebsite" name="website" tabindex="-1" autocomplete="off"></label></div>\n';
+            if (!html.includes('id="leadWebsite"')) {
+              const pos = html.indexOf(formMarker);
+              if (pos < 0) throw new Error('Lead form marker not found');
+              const insertAt = pos + formMarker.length;
+              html = html.slice(0, insertAt) + '\n' + honeypot + html.slice(insertAt);
+            }
 
-      - name: Verify frontend and worker syntax
-        run: |
-          if grep -nE 'TELEGRAM_BOT_TOKEN|api\.telegram\.org/bot|TELEGRAM_CHAT_ID' index.html; then
-            echo 'ERROR: Telegram secret/API reference remains in index.html'
-            exit 1
-          fi
-          node --check worker.js
-          python3 - <<'PY'
-          from pathlib import Path
-          s=Path('index.html').read_text(encoding='utf-8')
-          start=s.find('<script>')+len('<script>')
-          end=s.rfind('</script>')
-          if start < len('<script>') or end < 0:
-              raise SystemExit('script block not found')
-          Path('/tmp/frontend.js').write_text(s[start:end], encoding='utf-8')
-          PY
-          node --check /tmp/frontend.js
+            if (/TELEGRAM_BOT_TOKEN|TELEGRAM_CHAT_ID|api\.telegram\.org\/bot/.test(html)) throw new Error('Telegram secret/API reference still present');
 
-      - name: Commit migration
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          rm -f .github/workflows/secure-telegram-migration.yml
-          git add index.html worker.js wrangler.jsonc .assetsignore .github/workflows/secure-telegram-migration.yml
-          git commit -m 'security: move Telegram lead handling to worker'
-          git push origin HEAD:security/remove-old-telegram-token
+            await github.rest.repos.createOrUpdateFileContents({
+              owner, repo, path, branch, sha,
+              message: 'security: remove Telegram credentials from frontend',
+              content: Buffer.from(html, 'utf8').toString('base64')
+            });
+
+            core.setOutput('done', 'true');
+
+            const wf = await github.rest.repos.getContent({ owner, repo, path: '.github/workflows/secure-telegram-migration.yml', ref: branch });
+            await github.rest.repos.deleteFile({ owner, repo, path: '.github/workflows/secure-telegram-migration.yml', branch, sha: wf.data.sha, message: 'chore: remove temporary migration workflow' });
