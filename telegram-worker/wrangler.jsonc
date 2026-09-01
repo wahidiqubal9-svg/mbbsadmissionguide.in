@@ -1,0 +1,5 @@
+{
+  "name": "mbbs-admission-telegram",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01"
+}
