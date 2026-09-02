@@ -801,29 +801,9 @@
 </div>
 
 <script>
-  /* ═══ TELEGRAM CONFIG ═══ */
-  const TELEGRAM_BOT_TOKEN = '8602054244:AAH2_IA9mCn48BF9MukWMjrbL6-Loal6Yz4';
-  /* ▼ Paste your Chat ID between the quotes (see getUpdates link) ▼ */
-  const TELEGRAM_CHAT_ID = '';
+  /* ═══ CONFIG ═══ */
   const WHATSAPP_NUMBER = '918942954415';
-
-  let resolvedChatId = (TELEGRAM_CHAT_ID && String(TELEGRAM_CHAT_ID).trim()) ? String(TELEGRAM_CHAT_ID).trim() : null;
-
-  async function resolveChatId(){
-    if(resolvedChatId) return resolvedChatId;
-    try{
-      const res  = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?timeout=0`);
-      const data = await res.json();
-      if(data.ok && Array.isArray(data.result) && data.result.length){
-        for(let i = data.result.length - 1; i >= 0; i--){
-          const upd  = data.result[i];
-          const chat = upd?.message?.chat || upd?.edited_message?.chat || upd?.channel_post?.chat || upd?.my_chat_member?.chat;
-          if(chat && chat.id){ resolvedChatId = String(chat.id); return resolvedChatId; }
-        }
-      }
-      return null;
-    }catch(e){ return null; }
-  }
+  const API_ENDPOINT = 'https://mbbsadmissionguide-in.wahidiqubal9.workers.dev/api/lead';
 
   async function submitLead(e){
     e.preventDefault();
@@ -839,30 +819,20 @@
       budget:  document.getElementById('leadBudget').value
     };
 
-    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-    const message = [
-      '🎓 <b>New MBBS Abroad Lead</b>',
-      '━━━━━━━━━━━━━━━━━━',
-      `👤 <b>Name:</b> ${esc(details.name)}`,
-      `📱 <b>Phone:</b> ${esc(details.phone)}`,
-      `📝 <b>NEET:</b> ${esc(details.neet)}`,
-      `🌍 <b>Country:</b> ${esc(details.country)}`,
-      `💰 <b>Budget:</b> ${esc(details.budget)}`,
-      '━━━━━━━━━━━━━━━━━━',
-      `🕒 ${new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'})} IST`,
-      '📍 Source: mbbsadmissionguide.in'
-    ].join('\n');
-
     try{
-      const chatId = await resolveChatId();
-      if(!chatId) throw new Error('No Chat ID configured.');
-      const res  = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode:'HTML', disable_web_page_preview:true })
+      const res = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(details)
       });
-      const data = await res.json();
-      if(data.ok){ showLeadSuccess(); } else { throw new Error(data.description || 'Telegram API error'); }
+
+      const data = await res.json().catch(() => ({}));
+
+      if(res.ok && data.ok){
+        showLeadSuccess();
+      } else {
+        throw new Error(data.error || 'API error');
+      }
     }catch(err){
       btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = originalHTML;
       showLeadError(details, err.message);
