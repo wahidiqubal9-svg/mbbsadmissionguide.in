@@ -17,8 +17,127 @@
 <body data-page="india">
 <div class="app">
 
-  <!-- ▸ PASTE THE EXACT HEADER + DRAWER BLOCKS FROM index.html HERE ▸ -->
+  <!-- ═══ STATIC HEADER + MEGA MENU ═══ -->
+  <header class="top-header">
+    <div class="header-inner">
+      <a href="/" class="brand"><div class="brand-logo">M+</div><div class="brand-text"><b>MBBS Admission Guide</b><span>Founded by Doctors</span></div></a>
+      <nav class="header-nav" aria-label="Primary">
+        <button class="nav-trigger" data-mega="abroad">MBBS Abroad <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="nav-trigger" data-mega="india">MBBS India <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="nav-trigger" data-mega="resources">Resources <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <a class="nav-trigger solid" href="/contact">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <button class="apply-pill" onclick="scrollToId('lead')">Free Counseling</button>
+        <a class="icon-btn" href="tel:+918942954415" aria-label="Call"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+        <button class="hamburger" id="drawerOpen" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      </div>
+    </div>
 
+    <div class="mega-wrap" id="mega-abroad"><div class="mega-panel">
+      <div class="mega-col"><h6>Top Destinations</h6><ul>
+        <li><a class="mega-link" href="/abroad/bangladesh/"><span class="mflag">🇧🇩</span><span class="mtxt"><b>Bangladesh</b><small>English · 2 hrs away</small></span><span class="mtag">55% FMGE</span></a></li>
+        <li><a class="mega-link" href="/abroad/russia/"><span class="mflag">🇷🇺</span><span class="mtxt"><b>Russia</b><small>60+ NMC universities</small></span><span class="mtag">From ₹2.8L</span></a></li>
+        <li><a class="mega-link" href="/abroad/georgia/"><span class="mflag">🇬🇪</span><span class="mtxt"><b>Georgia</b><small>English medium</small></span><span class="mtag">EU Degree</span></a></li>
+        <li><a class="mega-link" href="/abroad/kazakhstan/"><span class="mflag">🇰🇿</span><span class="mtxt"><b>Kazakhstan</b><small>From ₹2.5L/yr</small></span><span class="mtag">Budget</span></a></li>
+        <li><a class="mega-link" href="/abroad/uzbekistan/"><span class="mflag">🇺🇿</span><span class="mtxt"><b>Uzbekistan</b><small>From ₹2.2L/yr</small></span><span class="mtag">Low Cost</span></a></li>
+        <li><a class="mega-link" href="/abroad/philippines/"><span class="mflag">🇵🇭</span><span class="mtxt"><b>Philippines</b><small>Clinical focus</small></span><span class="mtag">US Pattern</span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>Compare & Decide</h6><ul>
+        <li><a class="mega-link" href="/abroad/compare/bangladesh-vs-russia/"><span class="mtxt"><b>Bangladesh vs Russia</b></span></a></li>
+        <li><a class="mega-link" href="/abroad/compare/bangladesh-vs-georgia/"><span class="mtxt"><b>Bangladesh vs Georgia</b></span></a></li>
+        <li><a class="mega-link" href="/abroad/compare/cheapest/"><span class="mtxt"><b>Cheapest Countries</b></span></a></li>
+        <li><a class="mega-link" href="/abroad/compare/highest-fmge/"><span class="mtxt"><b>Highest FMGE Pass Rate</b></span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>Abroad Resources</h6><ul>
+        <li><a class="mega-link" href="/resources/fmge/"><span class="mtxt"><b>FMGE Pass Rates 2026</b></span></a></li>
+        <li><a class="mega-link" href="/resources/education-loans/"><span class="mtxt"><b>Education Loans</b></span></a></li>
+        <li><a class="mega-link" href="/resources/visa-guide/"><span class="mtxt"><b>Visa Guide</b></span></a></li>
+        <li><a class="mega-link" href="/resources/scholarships/"><span class="mtxt"><b>Scholarships</b></span></a></li>
+      </ul></div>
+      <div class="mega-featured"><div><div class="memoji">🎯</div><b>Not sure which country?</b><p>Take the 30-second quiz and get a personalized country match.</p></div><a href="/abroad/#lead">Find my match <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
+    </div></div>
+
+    <div class="mega-wrap" id="mega-india"><div class="mega-panel">
+      <div class="mega-col"><h6>Admission Routes</h6><ul>
+        <li><a class="mega-link" href="/india/#aiq"><span class="mflag">🏛️</span><span class="mtxt"><b>NEET UG / AIQ</b><small>All India Quota</small></span><span class="mtag">MCC</span></a></li>
+        <li><a class="mega-link" href="/india/#state"><span class="mflag">📋</span><span class="mtxt"><b>State Counseling</b><small>85% state seats</small></span></a></li>
+        <li><a class="mega-link" href="/india/#deemed"><span class="mflag">🎓</span><span class="mtxt"><b>Deemed Universities</b><small>Management seats</small></span></a></li>
+        <li><a class="mega-link" href="/india/#nri"><span class="mflag">🛂</span><span class="mtxt"><b>NRI Quota</b><small>Sponsored seats</small></span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>Top States</h6><ul>
+        <li><a class="mega-link" href="/india/#state"><span class="mtxt"><b>Maharashtra</b></span></a></li>
+        <li><a class="mega-link" href="/india/#state"><span class="mtxt"><b>Karnataka</b></span></a></li>
+        <li><a class="mega-link" href="/india/#state"><span class="mtxt"><b>Tamil Nadu</b></span></a></li>
+        <li><a class="mega-link" href="/india/#state"><span class="mtxt"><b>West Bengal</b></span></a></li>
+        <li><a class="mega-link" href="/india/#state"><span class="mtxt"><b>Uttar Pradesh</b></span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>India Resources</h6><ul>
+        <li><a class="mega-link" href="/india/#cutoff"><span class="mtxt"><b>NEET Cutoff 2026</b></span></a></li>
+        <li><a class="mega-link" href="/india/#process"><span class="mtxt"><b>Counseling Process</b></span></a></li>
+        <li><a class="mega-link" href="/india/#documents"><span class="mtxt"><b>Documents Required</b></span></a></li>
+        <li><a class="mega-link" href="/india/#fees"><span class="mtxt"><b>Fee Structure Guide</b></span></a></li>
+      </ul></div>
+      <div class="mega-featured"><div><div class="memoji">📝</div><b>NEET 2026 counseling is open</b><p>MCC & state rounds are live. Get expert choice-filling help.</p></div><a href="/india/#lead">Get counseling help <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
+    </div></div>
+
+    <div class="mega-wrap" id="mega-resources"><div class="mega-panel">
+      <div class="mega-col"><h6>Exams</h6><ul>
+        <li><a class="mega-link" href="/resources/fmge/"><span class="mtxt"><b>FMGE Screening</b></span></a></li>
+        <li><a class="mega-link" href="/resources/next/"><span class="mtxt"><b>NExT Exam</b></span></a></li>
+        <li><a class="mega-link" href="/india/"><span class="mtxt"><b>NEET UG</b></span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>Finance</h6><ul>
+        <li><a class="mega-link" href="/resources/education-loans/"><span class="mtxt"><b>Education Loans</b></span></a></li>
+        <li><a class="mega-link" href="/resources/scholarships/"><span class="mtxt"><b>Scholarships</b></span></a></li>
+      </ul></div>
+      <div class="mega-col"><h6>Guides</h6><ul>
+        <li><a class="mega-link" href="/resources/visa-guide/"><span class="mtxt"><b>Visa Guide</b></span></a></li>
+        <li><a class="mega-link" href="/resources/hostel-life/"><span class="mtxt"><b>Hostel Life</b></span></a></li>
+      </ul></div>
+      <div class="mega-featured"><div><div class="memoji">📖</div><b>Read the blog</b><p>Weekly guides on NEET, FMGE, and choosing the right path.</p></div><a href="/blog/">Visit blog <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>
+    </div></div>
+  </header>
+
+  <!-- ═══ STATIC MOBILE DRAWER ═══ -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Mobile navigation">
+    <div class="drawer-head"><div class="brand-text"><b>MBBS Admission Guide</b><span style="font-size:9px;opacity:.6;letter-spacing:.2em;text-transform:uppercase">Founded by Doctors</span></div>
+      <button class="drawer-close" id="drawerClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer-body">
+      <div class="acc"><button class="acc-head" onclick="toggleAcc(this)"><span class="lft"><span class="fico">🌏</span>MBBS Abroad</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="acc-body"><a class="acc-link" href="/abroad/"><span class="mflag">🏠</span> Abroad Overview</a>
+          <div class="acc-group"><h6>Destinations</h6>
+            <a class="acc-link" href="/abroad/bangladesh/"><span class="mflag">🇧🇩</span>Bangladesh<span class="mtag">55% FMGE</span></a>
+            <a class="acc-link" href="/abroad/russia/"><span class="mflag">🇷🇺</span>Russia</a>
+            <a class="acc-link" href="/abroad/georgia/"><span class="mflag">🇬🇪</span>Georgia</a>
+            <a class="acc-link" href="/abroad/kazakhstan/"><span class="mflag">🇰🇿</span>Kazakhstan</a>
+            <a class="acc-link" href="/abroad/uzbekistan/"><span class="mflag">🇺🇿</span>Uzbekistan</a>
+            <a class="acc-link" href="/abroad/philippines/"><span class="mflag">🇵🇭</span>Philippines</a>
+          </div>
+        </div></div>
+      <div class="acc"><button class="acc-head" onclick="toggleAcc(this)"><span class="lft"><span class="fico">🇮🇳</span>MBBS India</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="acc-body"><a class="acc-link" href="/india/"><span class="mflag">🏠</span> India Overview</a>
+          <div class="acc-group"><h6>Admission Routes</h6>
+            <a class="acc-link" href="/india/#aiq"><span class="mflag">🏛️</span>NEET UG / AIQ</a>
+            <a class="acc-link" href="/india/#state"><span class="mflag">📋</span>State Counseling</a>
+            <a class="acc-link" href="/india/#deemed"><span class="mflag">🎓</span>Deemed Universities</a>
+            <a class="acc-link" href="/india/#nri"><span class="mflag">🛂</span>NRI Quota</a>
+          </div>
+        </div></div>
+      <div class="acc"><button class="acc-head" onclick="toggleAcc(this)"><span class="lft"><span class="fico">📚</span>Resources</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="acc-body"><div class="acc-group"><h6>Popular</h6>
+            <a class="acc-link" href="/resources/fmge/">FMGE Guide</a>
+            <a class="acc-link" href="/resources/education-loans/">Education Loans</a>
+            <a class="acc-link" href="/resources/visa-guide/">Visa Guide</a>
+            <a class="acc-link" href="/blog/">Blog</a>
+          </div></div></div>
+    </div>
+    <div class="drawer-cta"><a href="javascript:scrollToId('lead');closeDrawer()" class="primary">Get Free Counseling</a><a href="tel:+918942954415" class="ghost">📞 Call +91 89429 54415</a></div>
+  </aside>
+
+  <!-- ═══ PAGE CONTENT ═══ -->
   <main>
   <div class="crumb-bar"><nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="sep">›</span><span class="current">MBBS in India</span></nav></div>
 
@@ -59,8 +178,27 @@
   </div>
   </main>
 
-  <!-- ▸ PASTE THE EXACT FOOTER + FLOATING CHROME FROM index.html HERE ▸ -->
+  <!-- ═══ STATIC FOOTER ═══ -->
+  <footer class="footer"><div class="footer-inner"><div class="footer-grid">
+    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal & Dr. Imtiyaz Ahmad. MBBS counseling for India and NMC-recognized universities abroad.</p>
+      <div class="badges"><div class="badge">NMC Recognized</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
+    <div class="footer-cols">
+      <div class="footer-col"><h6>MBBS Abroad</h6><ul><li><a href="/abroad/">Overview</a></li><li><a href="/abroad/bangladesh/">Bangladesh</a></li><li><a href="/abroad/russia/">Russia</a></li><li><a href="/abroad/georgia/">Georgia</a></li><li><a href="/abroad/kazakhstan/">Kazakhstan</a></li></ul></div>
+      <div class="footer-col"><h6>MBBS India</h6><ul><li><a href="/india/">Overview</a></li><li><a href="/india/#aiq">NEET UG / AIQ</a></li><li><a href="/india/#state">State Counseling</a></li><li><a href="/india/#deemed">Deemed</a></li><li><a href="/india/#nri">NRI Quota</a></li></ul></div>
+      <div class="footer-col"><h6>Resources</h6><ul><li><a href="/resources/fmge/">FMGE Guide</a></li><li><a href="/resources/education-loans/">Education Loans</a></li><li><a href="/resources/visa-guide/">Visa Guide</a></li><li><a href="/blog/">Blog</a></li></ul></div>
+      <div class="footer-col"><h6>Company</h6><ul><li><a href="/about/">About Us</a></li><li><a href="/contact">Contact</a></li><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms</a></li></ul></div>
+    </div>
+  </div><div class="copyright">© 2026 mbbsadmissionguide.in · All Rights Reserved</div></div></footer>
 
+  <!-- ═══ FLOATING CHROME (mobile) ═══ -->
+  <a href="https://wa.me/918942954415?text=Hi%2C%20I%20want%20India%20MBBS%20counseling" class="fab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12a9.9 9.9 0 0 0 1.4 5L2 22l5.2-1.4A10 10 0 1 0 12 2z"/></svg></a>
+  <nav class="bottom-nav">
+    <a class="nav-item" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+    <a class="nav-item" href="/abroad/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg><span>Abroad</span></a>
+    <a class="nav-item active" href="/india/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><span>India</span></a>
+    <a class="nav-item" href="javascript:scrollToId('lead')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Apply</span></a>
+    <a class="nav-item" href="tel:+918942954415"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Call</span></a>
+  </nav>
 </div>
 <script src="/assets/js/site.js"></script>
 </body>
