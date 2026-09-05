@@ -150,10 +150,13 @@ jobs:
           BRANCH_NAME="ai-fix-issue-${{ github.event.issue.number }}"
           git checkout -B "$BRANCH_NAME"
 
-          TASK_MSG="Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}. Fix discrepancies and apply the agreed changes."
-          if [ -f task_context.txt ]; then
-            TASK_MSG="$(cat task_context.txt)"
-          fi
+          cat << 'EOF' > prompt.txt
+          You are an automated coding agent. Apply all requested code changes and fixes directly to the files.
+          Do NOT audit, discuss, or repeat analysis lines. Modify the files immediately to resolve the task.
+          
+          Task Details:
+          EOF
+          cat task_context.txt >> prompt.txt
 
           aider \
             --model deepseek/deepseek-chat \
@@ -161,7 +164,8 @@ jobs:
             --no-check-update \
             --no-auto-commits \
             --no-show-release-notes \
-            --message "$TASK_MSG"
+            --map-tokens 1024 \
+            --message-file prompt.txt
 
           git add -A
           git commit -m "AI fixes for #${{ github.event.issue.number }}" || echo "No changes to commit"
