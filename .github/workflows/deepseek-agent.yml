@@ -8,9 +8,13 @@ on:
 
 jobs:
   agent:
+    # 1. Block all automated bots (Cloudflare, GitHub Actions, Dependabot, etc.)
+    # 2. Block comments on Pull Requests (only run on standard Issues)
     if: |
-      (github.event_name == 'issues') || 
-      (github.event_name == 'issue_comment' && github.event.comment.user.login != 'github-actions[bot]')
+      github.actor != 'cloudflare-workers-and-pages[bot]' &&
+      github.actor != 'github-actions[bot]' &&
+      !endsWith(github.actor, '[bot]') &&
+      !github.event.issue.pull_request
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -40,7 +44,7 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
         run: |
           python - << 'EOF'
-          import os, sys, requests, json
+          import os, sys, requests
           from openai import OpenAI
 
           api_key = os.environ["DEEPSEEK_API_KEY"]
@@ -58,7 +62,6 @@ jobs:
           def post_comment(msg):
               requests.post(comment_url, headers=headers, json={"body": msg})
 
-          # 1. Fetch entire conversation transcript
           issue_res = requests.get(f"https://api.github.com/repos/{repo}/issues/{issue_no}", headers=headers).json()
           comments_res = requests.get(comment_url, headers=headers).json()
 
@@ -67,17 +70,14 @@ jobs:
               for c in comments_res:
                   conversation_text += f"{c.get('user', {}).get('login', 'User')}: {c.get('body', '')}\n"
 
-          # 2. Check for /apply command
           if "/apply" in user_text.lower():
               post_comment("🤖 **Execution approved.** DeepSeek is auditing and applying changes across the repository. Creating branch and PR now...")
               with open("mode.txt", "w") as f:
                   f.write("EXECUTE")
-              # Save conversation history for Aider to read
               with open("task_context.txt", "w", encoding="utf-8") as f:
                   f.write(conversation_text)
               sys.exit(0)
 
-          # 3. Scan the entire repository tree & code contents
           ignored_dirs = {".git", ".github", "node_modules", "dist", "build", ".next", "vendor", "__pycache__"}
           all_repo_files = []
           for root, dirs, files in os.walk("."):
@@ -88,7 +88,6 @@ jobs:
 
           tree_str = "\n".join(all_repo_files[:200])
 
-          # Read code files up to 60KB total so DeepSeek has actual visibility
           code_dump = ""
           code_exts = (".html", ".css", ".js", ".jsx", ".ts", ".tsx", ".json", ".py", ".md")
           total_bytes = 0
@@ -110,7 +109,7 @@ jobs:
               f"Repository Tree:\n{tree_str}\n\n"
               f"Code Contents:\n{code_dump}\n\n"
               "Your mission:\n"
-              "1. When the user asks to inspect, audit, or fix discrepancies across the repository, analyze everything (broken links, unclosed HTML tags, missing SEO tags, performance issues, JS errors, styling bugs, dead code).\n"
+              "1. When the user asks to inspect, audit, or fix discrepancies across the repository, analyze everything.\n"
               "2. Present a clear, numbered list of findings with the exact file names and line adjustments needed.\n"
               "3. Ask the user which fixes they'd like, or instruct them to type '/apply' to fix all of them automatically.\n"
               "4. If the user asks for specific custom modifications, discuss and plan them step-by-step."
@@ -121,7 +120,7 @@ jobs:
 
           if isinstance(comments_res, list):
               for c in comments_res[-6:]:
-                  role = "assistant" if "github-actions[bot]" in c.get("user", {}).get("login", "") else "user"
+                  role = "assistant" if "[bot]" in c.get("user", {}).get("login", "") else "user"
                   history.append({"role": role, "content": c.get("body", "")})
 
           res = client.chat.completions.create(
@@ -157,7 +156,6 @@ jobs:
           BRANCH_NAME="ai-fix-issue-${{ github.event.issue.number }}"
           git checkout -B $BRANCH_NAME
 
-          # Feed the full agreed conversation context directly into Aider
           PROMPT="Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}. \
           Here is the full discussion and agreed plan: $(cat task_context.txt). \
           Apply all agreed changes, fixes, and improvements across the repository."
@@ -172,6 +170,7 @@ jobs:
           git push -u origin $BRANCH_NAME --force
 
       - name: Open Pull Request
+        id: cpr
         if: success()
         uses: peter-evans/create-pull-request@v6
         with:
@@ -183,3 +182,25 @@ jobs:
             
             ### Changes Summary
             Automated implementation and fixes completed by DeepSeek V3 based on discussion.
+
+      - name: Send Direct Push Notification
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO_NAME: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          python - << 'EOF'
+          import os, requests
+          token = os.environ["GITHUB_TOKEN"]
+          repo = os.environ["REPO_NAME"]
+          issue = os.environ["ISSUE_NUMBER"]
+          actor = os.environ["ACTOR"]
+
+          headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+          url = f"https://api.github.com/repos/{repo}/issues/{issue}/comments"
+          
+          body = f"@{actor} 🚀 **Work complete!** The Pull Request has been created and is ready for your review."
+          requests.post(url, headers=headers, json={"body": body})
+          EOF
