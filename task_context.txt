@@ -1,0 +1,75 @@
+Title: Check 
+Description: Hi, can you check the index.html, check for any discrepancy or broken code, fix them 
+
+github-actions[bot]: # Repository Audit: index.html
+
+I've analyzed `index.html` thoroughly. Here are the issues I found:
+
+---
+
+## 🔴 Critical Issues
+
+### 1. **Unclosed HTML Tag (Line ~90)**
+The mega menu for "India Resources" section is cut off mid-tag:
+```html
+<li><a class="mega-link" href="/india/#cutoff"><span class="mtxt"><b>NEET Cutoff 2026</b></span></a></li>
+<l   <!-- ← BROKEN: Tag is cut off mid-element -->
+```
+The `<li>` element starting with `<l` is never closed, and the entire mega menu panel structure is incomplete.
+
+### 2. **Missing Closing Tags for Mega Menu Panels**
+The `mega-india` panel and `mega-resources` panel are never properly closed. The HTML structure breaks after the truncated `<l` tag.
+
+---
+
+## 🟡 Structural Issues
+
+### 3. **Incomplete Mega Menu Structure**
+The `mega-resources` panel (referenced by the `data-mega="resources"` button) is **completely missing** from the HTML. The navigation button exists but has no corresponding panel.
+
+### 4. **Missing Closing `</div>` Tags**
+The header section is missing multiple closing `</div>` tags to properly close:
+- `.mega-wrap` containers
+- `.mega-panel` containers
+- `.header-inner`
+- `.top-header`
+
+---
+
+## 🟢 Recommendations
+
+### 5. **Add Missing Mega Menu Panel for Resources**
+The `Resources` nav button needs its corresponding panel with links to:
+- FMGE Pass Rates
+- Education Loans
+- Visa Guide
+- Scholarships
+
+### 6. **Complete the India Resources Section**
+Finish the truncated list items for:
+- Counseling Process
+- State-wise Cutoffs
+- Other India resources
+
+---
+
+## Suggested Fix
+
+The file needs to be completed with:
+1. Properly closed `<li>` elements
+2. Complete `mega-resources` panel
+3. All closing `</div>` tags for the mega menu structure
+4. Proper closure of the header section
+
+---
+
+Would you like me to:
+1. **Fix all issues automatically** — type `/apply`
+2. **Fix specific issues** — tell me which numbered items to address
+3. **See the corrected HTML** — I can show you the complete fixed version first
+
+What would you prefer?
+
+---
+*Reply with refinements, or type **`/apply`** to branch, fix discrepancies, and open a PR.*
+wahidiqubal9-svg: /apply 
