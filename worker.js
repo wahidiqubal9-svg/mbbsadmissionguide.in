@@ -110,7 +110,7 @@ export default {
         leadType,
         '━━━━━━━━━━━━━━━━━━',
         `👤 <b>Name:</b> ${escapeHtml(name)}`,
-        `📱 <b>Phone:</b> <code>${escapeHtml(phone}</code>`,
+        `📱 <b>Phone:</b> <code>${escapeHtml(phone)}</code>`,
         `📝 <b>NEET Status:</b> ${escapeHtml(neet)}`,
         ...extraLines,
         '━━━━━━━━━━━━━━━━━━',
