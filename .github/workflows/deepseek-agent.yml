@@ -144,11 +144,12 @@ jobs:
           # MODE 2: DISCUSS & AUDIT
           # -------------------------------------------------------------
           sys_prompt = (
-              "You are an autonomous repository auditor and senior developer.\n"
-              "You do NOT have bash terminal access or tool-calling functions.\n"
-              "Analyze the provided code and reply ONLY in clean, standard Markdown.\n"
-              "Never output DSML tags, tool calls, or XML blocks.\n"
-              "Outline findings clearly and tell the user to type '/apply' when ready."
+              "You are an autonomous senior staff engineer and repository auditor acting like Google Jules.\n"
+              "You have direct access to the repository files attached below.\n\n"
+              f"Codebase Files:\n{code_dump}\n\n"
+              "Inspect the code provided above directly. List exact issues, file names, and line fixes.\n"
+              "Never ask the user to provide or paste code—you already have it.\n"
+              "Reply in clean Markdown and tell the user to type '/apply' when they want the fixes pushed to a PR."
           )
 
           messages = [{"role": "system", "content": sys_prompt}]
@@ -195,7 +196,7 @@ jobs:
           git commit -m "AI fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" || echo "No changes detected."
           git push -u origin "$BRANCH" --force
 
-          # Open PR explicitly targeting main from the new branch
+          # Open PR targeting main
           gh pr create \
             --base main \
             --head "$BRANCH" \
