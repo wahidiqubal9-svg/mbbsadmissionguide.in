@@ -15,7 +15,7 @@ const ALLOWED_COUNTRIES = new Set([
   'Kazakhstan',
   'Uzbekistan',
   'Philippines',
-  'Kyrgyzstan',
+  'Bangladesh',
   'Not Sure'
 ]);
 const ALLOWED_BUDGETS = new Set([
@@ -25,18 +25,18 @@ const ALLOWED_BUDGETS = new Set([
   'Above 8 Lakh'
 ]);
 const ALLOWED_INDIA_PATHS = new Set([
-  'NEET UG / AIQ',
-  'State Counseling',
-  'Deemed Universities',
-  'NRI Quota'
+  'Govt College',
+  'Private College',
+  'Deemed University',
+  'NRI Quota',
+  'Not Sure'
 ]);
 const ALLOWED_NEET_SCORES = new Set([
-  'Below 300',
-  '300 – 400',
+  'Below 400',
   '400 – 500',
   '500 – 600',
   '600 – 650',
-  'Above 650'
+  '650+'
 ]);
 
 function json(data, status = 200, origin = null) {
