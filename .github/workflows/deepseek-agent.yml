@@ -1,4 +1,4 @@
-name: DeepSeek Jules Replacement
+name: DeepSeek Autonomous Agent
 
 on:
   issue_comment:
@@ -7,7 +7,7 @@ on:
     types: [opened]
 
 jobs:
-  interactive-coder:
+  agent:
     if: |
       (github.event_name == 'issues') || 
       (github.event_name == 'issue_comment' && github.event.comment.user.login != 'github-actions[bot]')
@@ -18,7 +18,7 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Full Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Tools
+      - name: Install Dependencies
         run: pip install openai aider-chat requests
 
       - name: Process Discussion or Execution
@@ -40,7 +40,7 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
         run: |
           python - << 'EOF'
-          import os, sys, requests
+          import os, sys, requests, json
           from openai import OpenAI
 
           api_key = os.environ["DEEPSEEK_API_KEY"]
@@ -58,40 +58,81 @@ jobs:
           def post_comment(msg):
               requests.post(comment_url, headers=headers, json={"body": msg})
 
+          # 1. Fetch entire conversation transcript
+          issue_res = requests.get(f"https://api.github.com/repos/{repo}/issues/{issue_no}", headers=headers).json()
+          comments_res = requests.get(comment_url, headers=headers).json()
+
+          conversation_text = f"Title: {issue_res.get('title', '')}\nDescription: {issue_res.get('body', '')}\n\n"
+          if isinstance(comments_res, list):
+              for c in comments_res:
+                  conversation_text += f"{c.get('user', {}).get('login', 'User')}: {c.get('body', '')}\n"
+
+          # 2. Check for /apply command
           if "/apply" in user_text.lower():
-              post_comment("🤖 **Plan approved.** Running DeepSeek via Aider to write the code and create a Pull Request...")
+              post_comment("🤖 **Execution approved.** DeepSeek is auditing and applying changes across the repository. Creating branch and PR now...")
               with open("mode.txt", "w") as f:
                   f.write("EXECUTE")
+              # Save conversation history for Aider to read
+              with open("task_context.txt", "w", encoding="utf-8") as f:
+                  f.write(conversation_text)
               sys.exit(0)
+
+          # 3. Scan the entire repository tree & code contents
+          ignored_dirs = {".git", ".github", "node_modules", "dist", "build", ".next", "vendor", "__pycache__"}
+          all_repo_files = []
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if d not in ignored_dirs and not d.startswith(".")]
+              for f in files:
+                  if not f.startswith("."):
+                      all_repo_files.append(os.path.relpath(os.path.join(root, f), "."))
+
+          tree_str = "\n".join(all_repo_files[:200])
+
+          # Read code files up to 60KB total so DeepSeek has actual visibility
+          code_dump = ""
+          code_exts = (".html", ".css", ".js", ".jsx", ".ts", ".tsx", ".json", ".py", ".md")
+          total_bytes = 0
+          for fpath in all_repo_files:
+              if fpath.endswith(code_exts) and total_bytes < 60000:
+                  try:
+                      with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
+                          content = f.read(8000)
+                          total_bytes += len(content)
+                          code_dump += f"\n\n--- [FILE: {fpath}] ---\n{content}\n"
+                  except Exception:
+                      pass
 
           client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-          all_comments = requests.get(comment_url, headers=headers).json()
-          history = [{
-              "role": "system",
-              "content": (
-                  "You are an expert AI software engineer acting like Google Jules. "
-                  "Analyze the user's issue and propose a numbered, step-by-step implementation plan. "
-                  "Specify which exact files need changes. Do NOT output long blocks of raw code yet. "
-                  "Ask for feedback and invite the user to type '/apply' when they are ready for you to code."
-              )
-          }]
+          system_prompt = (
+              "You are an autonomous staff engineer and repository auditor acting like Google Jules.\n"
+              "You have access to the complete codebase files provided below.\n\n"
+              f"Repository Tree:\n{tree_str}\n\n"
+              f"Code Contents:\n{code_dump}\n\n"
+              "Your mission:\n"
+              "1. When the user asks to inspect, audit, or fix discrepancies across the repository, analyze everything (broken links, unclosed HTML tags, missing SEO tags, performance issues, JS errors, styling bugs, dead code).\n"
+              "2. Present a clear, numbered list of findings with the exact file names and line adjustments needed.\n"
+              "3. Ask the user which fixes they'd like, or instruct them to type '/apply' to fix all of them automatically.\n"
+              "4. If the user asks for specific custom modifications, discuss and plan them step-by-step."
+          )
 
-          history.append({"role": "user", "content": f"Issue details: {user_text}"})
+          history = [{"role": "system", "content": system_prompt}]
+          history.append({"role": "user", "content": f"User request: {user_text}"})
 
-          if isinstance(all_comments, list):
-              for c in all_comments[-6:]:
+          if isinstance(comments_res, list):
+              for c in comments_res[-6:]:
                   role = "assistant" if "github-actions[bot]" in c.get("user", {}).get("login", "") else "user"
                   history.append({"role": role, "content": c.get("body", "")})
 
           res = client.chat.completions.create(
               model="deepseek-chat",
               messages=history,
-              temperature=0.3
+              temperature=0.2
           )
 
-          reply = res.choices[0].message.content + "\n\n---\n*Reply with any feedback or changes. When you are ready, reply with **`/apply`** to generate the code and PR.*"
+          reply = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, fix discrepancies, and open a PR.*"
           post_comment(reply)
+
           with open("mode.txt", "w") as f:
               f.write("DISCUSS")
           EOF
@@ -100,6 +141,9 @@ jobs:
         if: success()
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           MODE=$(cat mode.txt)
           if [ "$MODE" != "EXECUTE" ]; then
@@ -110,27 +154,32 @@ jobs:
           git config --global user.name "DeepSeek Bot"
           git config --global user.email "bot@deepseek.com"
 
-          BRANCH_NAME="ai-fix-${{ github.event.issue.number }}"
-          git checkout -b $BRANCH_NAME
+          BRANCH_NAME="ai-fix-issue-${{ github.event.issue.number }}"
+          git checkout -B $BRANCH_NAME
 
-          PROMPT="Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}. Apply the agreed implementation plan from the issue discussion."
-          
+          # Feed the full agreed conversation context directly into Aider
+          PROMPT="Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}. \
+          Here is the full discussion and agreed plan: $(cat task_context.txt). \
+          Apply all agreed changes, fixes, and improvements across the repository."
+
           aider --yes \
                 --model deepseek/deepseek-chat \
                 --message "$PROMPT" \
                 --no-auto-commits
 
-          git add .
-          git commit -m "AI fix for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes to commit"
-          git push origin $BRANCH_NAME
+          git add -A
+          git commit -m "AI fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes to commit"
+          git push -u origin $BRANCH_NAME --force
 
-      - name: Create Pull Request
+      - name: Open Pull Request
         if: success()
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "ai-fix-${{ github.event.issue.number }}"
-          title: "Fix for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+          branch: "ai-fix-issue-${{ github.event.issue.number }}"
+          title: "Fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
           body: |
             Closes #${{ github.event.issue.number }}.
-            Code generated using DeepSeek V3 based on approved discussion plan.
+            
+            ### Changes Summary
+            Automated implementation and fixes completed by DeepSeek V3 based on discussion.
