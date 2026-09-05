@@ -1,0 +1,138 @@
+name: DeepSeek Jules Replacement
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+jobs:
+  interactive-coder:
+    # Prevent the workflow from triggering on the bot's own comments
+    if: github.event.comment.user.login != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Tools
+        run: pip install openai aider-chat requests
+
+      - name: Process Discussion or Execution
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO_NAME: ${{ github.repository }}
+          COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
+        run: |
+          python - << 'EOF'
+          import os, sys, requests
+          from openai import OpenAI
+
+          api_key = os.environ["DEEPSEEK_API_KEY"]
+          token = os.environ["GITHUB_TOKEN"]
+          issue_no = os.environ["ISSUE_NUMBER"]
+          repo = os.environ["REPO_NAME"]
+          user_text = os.environ["COMMENT_BODY"]
+
+          headers = {
+              "Authorization": f"token {token}",
+              "Accept": "application/vnd.github.v3+json"
+          }
+          comment_url = f"https://api.github.com/repos/{repo}/issues/{issue_no}/comments"
+
+          def post_comment(msg):
+              requests.post(comment_url, headers=headers, json={"body": msg})
+
+          # 1. Trigger code execution when user replies /apply
+          if "/apply" in user_text.lower():
+              post_comment("🤖 **Plan approved.** Running DeepSeek via Aider to write the code and create a Pull Request...")
+              with open("mode.txt", "w") as f:
+                  f.write("EXECUTE")
+              sys.exit(0)
+
+          # 2. Discussion mode: Plan and discuss with user first
+          client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
+          all_comments = requests.get(comment_url, headers=headers).json()
+          history = [{
+              "role": "system",
+              "content": (
+                  "You are an expert AI software engineer acting like Google Jules. "
+                  "Analyze the user's issue and propose a numbered, step-by-step implementation plan. "
+                  "Specify which exact files need changes. Do NOT output long blocks of raw code yet. "
+                  "Ask for feedback and invite the user to type '/apply' when they are ready for you to code."
+              )
+          }]
+
+          history.append({"role": "user", "content": f"Issue details: {user_text}"})
+
+          if isinstance(all_comments, list):
+              for c in all_comments[-6:]:
+                  role = "assistant" if "github-actions[bot]" in c.get("user", {}).get("login", "") else "user"
+                  history.append({"role": role, "content": c.get("body", "")})
+
+          res = client.chat.completions.create(
+              model="deepseek-chat",
+              messages=history,
+              temperature=0.3
+          )
+
+          reply = res.choices[0].message.content + "\n\n---\n*Reply with any feedback or changes. When you are ready, reply with **`/apply`** to generate the code and PR.*"
+          post_comment(reply)
+          with open("mode.txt", "w") as f:
+              f.write("DISCUSS")
+          EOF
+
+      - name: Apply Code with Aider
+        if: success()
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          MODE=$(cat mode.txt)
+          if [ "$MODE" != "EXECUTE" ]; then
+            echo "In discussion mode. Skipping execution."
+            exit 0
+          fi
+
+          git config --global user.name "DeepSeek Bot"
+          git config --global user.email "bot@deepseek.com"
+
+          BRANCH_NAME="ai-fix-${{ github.event.issue.number }}"
+          git checkout -b $BRANCH_NAME
+
+          PROMPT="Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}. Apply the agreed implementation plan from the issue discussion."
+          
+          aider --yes \
+                --model deepseek/deepseek-chat \
+                --message "$PROMPT" \
+                --no-auto-commits
+
+          git add .
+          git commit -m "AI implementation for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes to commit"
+          git push origin $BRANCH_NAME
+
+      - name: Create Pull Request
+        if: success()
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "ai-fix-${{ github.event.issue.number }}"
+          title: "Fix for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
+          body: |
+            Closes #${{ github.event.issue.number }}.
+            Code generated using DeepSeek V3 based on approved discussion plan.
+
