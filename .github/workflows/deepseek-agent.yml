@@ -25,6 +25,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout Issue Branch if Exists
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          BRANCH="ai-fix-issue-${ISSUE_NUMBER}"
+          if git ls-remote --exit-code --heads origin "$BRANCH"; then
+            echo "Branch $BRANCH exists on remote. Checking it out."
+            git fetch origin "$BRANCH"
+            git checkout "$BRANCH"
+          else
+            echo "Branch $BRANCH does not exist yet. Creating it from main."
+            git checkout -b "$BRANCH"
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -73,8 +87,11 @@ jobs:
           if isinstance(comments_data, list):
               for c in comments_data:
                   login = c.get("user", {}).get("login", "")
-                  if "[bot]" not in login:
-                      convo += f"{login}: {c.get('body', '')}\n"
+                  body = c.get('body', '')
+                  # Clean bot responses to avoid confusing context
+                  if "[bot]" in login:
+                      body = re.sub(r"===FILE:.*?===END FILE===\n?", "<FILE_CHANGES_HIDDEN>", body, flags=re.DOTALL).strip()
+                  convo += f"{login}: {body}\n"
 
           code_dump = ""
           valid_exts = (".html", ".css", ".js", ".json", ".md")
@@ -94,40 +111,45 @@ jobs:
           client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
           # -------------------------------------------------------------
-          # MODE 1: EXECUTE (/apply)
+          # UNIFIED MODE: DISCUSS OR EXECUTE
           # -------------------------------------------------------------
-          if "/apply" in user_text.lower():
-              post_comment("🤖 **Executing requested changes.** DeepSeek is updating files and preparing the Pull Request...")
+          sys_prompt = (
+              "You are an autonomous senior developer.\n"
+              "You can both discuss solutions and apply code changes.\n"
+              "Analyze the user request and the codebase.\n\n"
+              "If the user is asking you to modify the code, or giving you permission to proceed, you MUST output the updated files.\n"
+              "To update files, you must output them in the exact following format:\n\n"
+              "===FILE: path/to/file.ext===\n"
+              "[complete updated file content]\n"
+              "===END FILE===\n\n"
+              "If you output the file block above, the code will be automatically committed and pushed to a PR branch.\n"
+              "If the user is just asking a question and not asking for code changes, simply answer their question in Markdown.\n\n"
+              f"Conversation History:\n{convo}\n\n"
+              f"Codebase Files:\n{code_dump}\n"
+          )
 
-              prompt = (
-                  "You are an autonomous senior developer.\n"
-                  "Apply the requested changes and bug fixes to the codebase based on the discussion:\n\n"
-                  f"Conversation History:\n{convo}\n\n"
-                  f"Codebase:\n{code_dump}\n\n"
-                  "INSTRUCTION:\n"
-                  "Provide the FULL updated content of every modified file using this exact format:\n\n"
-                  "===FILE: path/to/file.ext===\n"
-                  "[complete updated file content]\n"
-                  "===END FILE===\n\n"
-                  "Do NOT output markdown blocks, explanations, backticks, or DSML around the delimiters."
-              )
+          messages = [{"role": "system", "content": sys_prompt}]
 
-              res = client.chat.completions.create(
-                  model="deepseek-chat",
-                  messages=[
-                      {"role": "system", "content": "You are a code deployment engine that strictly outputs delimited file blocks without commentary."},
-                      {"role": "user", "content": prompt}
-                  ],
-                  temperature=0.1
-              )
+          # Only append the current user text, as the full history is already in `convo`
+          messages.append({"role": "user", "content": user_text})
 
-              out = res.choices[0].message.content
-              matches = re.findall(r"===FILE:\s*(.+?)===\s*\n(.*?)===END FILE===", out, re.DOTALL)
+          res = client.chat.completions.create(
+              model="deepseek-chat",
+              messages=messages,
+              temperature=0.1
+          )
 
-              if not matches:
-                  post_comment("⚠️ No delimited file changes were generated. Please provide more explicit instructions.")
-                  sys.exit(1)
+          answer = res.choices[0].message.content
 
+          # Clean any weird artifact tokens
+          answer = re.sub(r"<\s*\|\s*\|\s*DSML.*?</\s*\|\s*\|\s*tool_calls\s*>", "", answer, flags=re.DOTALL).strip()
+          answer = re.sub(r"<\|.*?\|>", "", answer).strip()
+
+          # Check if the AI decided to execute changes
+          matches = re.findall(r"===FILE:\s*(.+?)===\s*\n(.*?)===END FILE===", answer, re.DOTALL)
+
+          if matches:
+              post_comment("🤖 **I have generated code changes.** Applying them to the PR branch now...")
               for fpath, body in matches:
                   fpath = fpath.strip()
                   folder = os.path.dirname(fpath)
@@ -138,45 +160,16 @@ jobs:
 
               with open("mode.txt", "w") as m:
                   m.write("EXECUTE")
-              sys.exit(0)
 
-          # -------------------------------------------------------------
-          # MODE 2: DISCUSS & AUDIT
-          # -------------------------------------------------------------
-          sys_prompt = (
-              "You are an autonomous staff software engineer discussing repository improvements.\n"
-              "You do NOT have access to tool calling or terminal execution in this mode.\n"
-              "You have direct access to the repository files attached below.\n\n"
-              f"Codebase Files:\n{code_dump}\n\n"
-              "Analyze the provided code and reply ONLY in clean, direct Markdown text.\n"
-              "Never output < | | DSML | | ... >, XML tags, tool invocations, or function calls.\n"
-              "Clearly explain what you propose to change, and instruct the user to type '/apply' to apply the changes."
-          )
+              # Strip the file blocks out of the comment to keep it clean
+              clean_answer = re.sub(r"===FILE:.*?===END FILE===\n?", "", answer, flags=re.DOTALL).strip()
+              if clean_answer:
+                  post_comment(clean_answer)
 
-          messages = [{"role": "system", "content": sys_prompt}]
-          if isinstance(comments_data, list):
-              for c in comments_data[-5:]:
-                  role = "assistant" if "[bot]" in c.get("user", {}).get("login", "") else "user"
-                  clean_body = re.sub(r"<\s*\|\s*\|\s*DSML.*?</\s*\|\s*\|\s*tool_calls\s*>", "", c.get("body", ""), flags=re.DOTALL).strip()
-                  clean_body = re.sub(r"<\|.*?\|>", "", clean_body).strip()
-                  if clean_body:
-                      messages.append({"role": role, "content": clean_body})
-          messages.append({"role": "user", "content": user_text})
-
-          res = client.chat.completions.create(
-              model="deepseek-chat",
-              messages=messages,
-              temperature=0.2
-          )
-
-          answer = res.choices[0].message.content
-          answer = re.sub(r"<\s*\|\s*\|\s*DSML.*?</\s*\|\s*\|\s*tool_calls\s*>", "", answer, flags=re.DOTALL).strip()
-          answer = re.sub(r"<\|.*?\|>", "", answer).strip()
-          answer = answer + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
-          post_comment(answer)
-
-          with open("mode.txt", "w") as m:
-              m.write("DISCUSS")
+          else:
+              post_comment(answer)
+              with open("mode.txt", "w") as m:
+                  m.write("DISCUSS")
           EOF
 
       - name: Commit, Push and Open Pull Request
@@ -197,10 +190,11 @@ jobs:
 
           BRANCH="ai-fix-issue-${ISSUE_NUMBER}"
 
-          git checkout -B "$BRANCH"
           git add -A
           git commit -m "AI fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" || echo "No changes detected."
-          git push -u origin "$BRANCH" --force
+
+          # Only push if there's a branch to push (which there will be, either fresh from main or existing from checkout step)
+          git push -u origin "$BRANCH"
 
           # Open PR if it doesn't already exist
           PR_URL=$(gh pr create \
