@@ -8,8 +8,9 @@ on:
 
 jobs:
   interactive-coder:
-    # Prevent the workflow from triggering on the bot's own comments
-    if: github.event.comment.user.login != 'github-actions[bot]'
+    if: |
+      (github.event_name == 'issues') || 
+      (github.event_name == 'issue_comment' && github.event.comment.user.login != 'github-actions[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: setup-python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -57,14 +58,12 @@ jobs:
           def post_comment(msg):
               requests.post(comment_url, headers=headers, json={"body": msg})
 
-          # 1. Trigger code execution when user replies /apply
           if "/apply" in user_text.lower():
               post_comment("🤖 **Plan approved.** Running DeepSeek via Aider to write the code and create a Pull Request...")
               with open("mode.txt", "w") as f:
                   f.write("EXECUTE")
               sys.exit(0)
 
-          # 2. Discussion mode: Plan and discuss with user first
           client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
           all_comments = requests.get(comment_url, headers=headers).json()
@@ -122,7 +121,7 @@ jobs:
                 --no-auto-commits
 
           git add .
-          git commit -m "AI implementation for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes to commit"
+          git commit -m "AI fix for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes to commit"
           git push origin $BRANCH_NAME
 
       - name: Create Pull Request
@@ -135,4 +134,3 @@ jobs:
           body: |
             Closes #${{ github.event.issue.number }}.
             Code generated using DeepSeek V3 based on approved discussion plan.
-
