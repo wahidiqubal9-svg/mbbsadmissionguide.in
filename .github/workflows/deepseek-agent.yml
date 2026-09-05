@@ -1,14 +1,20 @@
 name: DeepSeek Autonomous Agent
 
 on:
-  issue_comment:
-    types: [created]
   issues:
     types: [opened]
+  issue_comment:
+    types: [created]
 
 jobs:
   agent:
-    if: "!endsWith(github.actor, '[bot]') && !github.event.issue.pull_request"
+    # 1. Never run on Pull Request comments
+    # 2. Never trigger for any automated bots (Cloudflare, GitHub actions, etc.)
+    if: |
+      !github.event.issue.pull_request &&
+      !endsWith(github.actor, '[bot]') &&
+      github.actor != 'cloudflare-workers-and-pages[bot]' &&
+      github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,7 +22,7 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Codebase
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,26 +32,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Dependencies
+      - name: Install Base Packages
         run: pip install openai requests
 
-      - name: Run DeepSeek Agent
+      - name: Run DeepSeek Engine
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO_NAME: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
           COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
         run: |
           python - << 'EOF'
-          import os, sys, json, requests
+          import os, sys, re, json, requests
           from openai import OpenAI
 
-          api_key = os.environ["DEEPSEEK_API_KEY"]
-          token = os.environ["GITHUB_TOKEN"]
+          api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+          token = os.environ.get("GITHUB_TOKEN", "").strip()
           issue_no = os.environ["ISSUE_NUMBER"]
           repo = os.environ["REPO_NAME"]
-          user_text = os.environ["COMMENT_BODY"]
+          actor = os.environ["ACTOR"]
+          user_text = os.environ.get("COMMENT_BODY", "").strip()
+
+          if not api_key:
+              print("DEEPSEEK_API_KEY secret is missing!")
+              sys.exit(1)
 
           headers = {
               "Authorization": f"token {token}",
@@ -53,155 +65,133 @@ jobs:
           }
           comment_url = f"https://api.github.com/repos/{repo}/issues/{issue_no}/comments"
 
-          def post_comment(msg):
-              requests.post(comment_url, headers=headers, json={"body": msg})
+          def post_comment(text):
+              requests.post(comment_url, headers=headers, json={"body": text})
 
-          issue_res = requests.get(f"https://api.github.com/repos/{repo}/issues/{issue_no}", headers=headers).json()
-          comments_res = requests.get(comment_url, headers=headers).json()
+          # Ingest Issue Discussion
+          issue_data = requests.get(f"https://api.github.com/repos/{repo}/issues/{issue_no}", headers=headers).json()
+          comments_data = requests.get(comment_url, headers=headers).json()
 
-          conversation_text = f"Title: {issue_res.get('title', '')}\nDescription: {issue_res.get('body', '')}\n\n"
-          if isinstance(comments_res, list):
-              for c in comments_res:
-                  conversation_text += f"{c.get('user', {}).get('login', 'User')}: {c.get('body', '')}\n"
+          convo = f"Title: {issue_data.get('title', '')}\nTask: {issue_data.get('body', '')}\n\n"
+          if isinstance(comments_data, list):
+              for c in comments_data:
+                  login = c.get("user", {}).get("login", "")
+                  if "[bot]" not in login:
+                      convo += f"{login}: {c.get('body', '')}\n"
+
+          # Ingest Repositories Files (ignoring large/irrelevant directories)
+          code_dump = ""
+          valid_exts = (".html", ".css", ".js", ".json", ".md")
+          skip_dirs = {".git", ".github", "node_modules", "dist", "build"}
+
+          for root, dirs, files in os.walk("."):
+              dirs[:] = [d for d in dirs if not d.startswith(".") and d not in skip_dirs]
+              for f in files:
+                  if f.endswith(valid_exts) and len(code_dump) < 60000:
+                      fpath = os.path.relpath(os.path.join(root, f), ".")
+                      try:
+                          with open(fpath, "r", encoding="utf-8", errors="ignore") as file_read:
+                              code_dump += f"\n\n--- [FILE: {fpath}] ---\n{file_read.read(8000)}\n"
+                      except Exception:
+                          pass
 
           client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-          # -------------------------------------------------------------
-          # MODE 1: EXECUTE (/apply)
-          # -------------------------------------------------------------
+          # -----------------------------------------------------------------
+          # EXECUTE MODE (/apply)
+          # -----------------------------------------------------------------
           if "/apply" in user_text.lower():
-              post_comment("🤖 **Execution approved.** DeepSeek is applying modifications directly to your repository files. Opening PR shortly...")
+              post_comment("🤖 **Executing requested changes.** DeepSeek is updating files and creating the Pull Request...")
 
-              # Ingest target files (HTML/CSS/JS)
-              code_context = {}
-              code_exts = (".html", ".css", ".js")
-              for root, dirs, files in os.walk("."):
-                  dirs[:] = [d for d in dirs if not d.startswith(".") and d not in {"node_modules", "dist", "build"}]
-                  for f in files:
-                      if f.endswith(code_exts):
-                          fpath = os.path.relpath(os.path.join(root, f), ".")
-                          try:
-                              with open(fpath, "r", encoding="utf-8", errors="ignore") as file:
-                                  code_context[fpath] = file.read()
-                          except Exception:
-                              pass
-
-              exec_prompt = (
-                  "You are an expert autonomous software engineer.\n"
-                  "Based on the discussion thread below, implement the necessary code changes directly.\n"
-                  "Return your changes strictly as a valid JSON object where keys are the relative file paths "
-                  "and values are the complete updated file content.\n"
-                  "Do not include markdown code blocks, backticks, or any commentary outside the raw JSON object.\n"
-                  "Format:\n"
-                  '{"path/to/file.ext": "full modified content here"}\n\n'
-                  f"Task & Conversation:\n{conversation_text}\n\n"
-                  f"Existing Codebase:\n{json.dumps(code_context)}"
+              prompt = (
+                  "You are an autonomous senior developer.\n"
+                  "Apply the requested changes and bug fixes to the codebase based on the discussion:\n\n"
+                  f"Conversation History:\n{convo}\n\n"
+                  f"Codebase:\n{code_dump}\n\n"
+                  "INSTRUCTION:\n"
+                  "Provide the FULL updated content of every modified file using this format:\n\n"
+                  "===FILE: path/to/file.ext===\n"
+                  "[complete updated file content]\n"
+                  "===END FILE===\n\n"
+                  "Do NOT output markdown blocks, explanations, or backticks around the delimiters."
               )
 
-              response = client.chat.completions.create(
+              res = client.chat.completions.create(
                   model="deepseek-chat",
                   messages=[
-                      {"role": "system", "content": "You are a code execution engine that only outputs strict JSON."},
-                      {"role": "user", "content": exec_prompt}
+                      {"role": "system", "content": "You are a code deployment engine that strictly outputs delimited file blocks."},
+                      {"role": "user", "content": prompt}
                   ],
                   temperature=0.1
               )
 
-              raw_json = response.choices[0].message.content.strip()
-              if raw_json.startswith("```json"):
-                  raw_json = raw_json[7:]
-              if raw_json.startswith("```"):
-                  raw_json = raw_json[3:]
-              if raw_json.endswith("```"):
-                  raw_json = raw_json[:-3]
-              raw_json = raw_json.strip()
+              out = res.choices[0].message.content
+              matches = re.findall(r"===FILE:\s*(.+?)===\s*\n(.*?)===END FILE===", out, re.DOTALL)
 
-              try:
-                  files_to_write = json.loads(raw_json)
-                  for file_path, content in files_to_write.items():
-                      os.makedirs(os.path.dirname(file_path), exist_ok=True) if os.path.dirname(file_path) else None
-                      with open(file_path, "w", encoding="utf-8") as f:
-                          f.write(content)
-                  print(f"Successfully modified: {list(files_to_write.keys())}")
-              except Exception as e:
-                  post_comment(f"⚠️ Error applying changes: {str(e)}")
+              if not matches:
+                  post_comment("⚠️ DeepSeek did not output delimited files. Please provide more explicit instructions.")
                   sys.exit(1)
 
-              with open("mode.txt", "w") as f:
-                  f.write("EXECUTE")
+              for fpath, body in matches:
+                  fpath = fpath.strip()
+                  folder = os.path.dirname(fpath)
+                  if folder:
+                      os.makedirs(folder, exist_ok=True)
+                  with open(fpath, "w", encoding="utf-8") as fw:
+                      fw.write(body.strip())
+
+              with open("mode.txt", "w") as m:
+                  m.write("EXECUTE")
               sys.exit(0)
 
-          # -------------------------------------------------------------
-          # MODE 2: DISCUSS & AUDIT
-          # -------------------------------------------------------------
-          ignored_dirs = {".git", ".github", "node_modules", "dist", "build"}
-          all_repo_files = []
-          for root, dirs, files in os.walk("."):
-              dirs[:] = [d for d in dirs if d not in ignored_dirs and not d.startswith(".")]
-              for f in files:
-                  if not f.startswith("."):
-                      all_repo_files.append(os.path.relpath(os.path.join(root, f), "."))
-
-          tree_str = "\n".join(all_repo_files[:150])
-
-          code_dump = ""
-          for fpath in all_repo_files:
-              if fpath.endswith((".html", ".css", ".js")) and len(code_dump) < 50000:
-                  try:
-                      with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                          code_dump += f"\n\n--- [FILE: {fpath}] ---\n{f.read(6000)}\n"
-                  except Exception:
-                      pass
-
-          system_prompt = (
-              "You are an autonomous staff engineer and repository auditor acting like Google Jules.\n"
-              "You have access to the repository tree and code contents below.\n\n"
-              f"Tree:\n{tree_str}\n\n"
-              f"Code:\n{code_dump}\n\n"
-              "Analyze issues clearly. Present concrete solutions. Invite the user to reply with refinements, "
-              "or type '/apply' to execute."
+          # -----------------------------------------------------------------
+          # DISCUSS MODE
+          # -----------------------------------------------------------------
+          sys_prompt = (
+              "You are an autonomous repository auditor and senior developer.\n"
+              "Inspect the code, outline clear findings, and suggest exact file adjustments.\n"
+              "Ask the user for adjustments, or instruct them to type '/apply' to build and open a Pull Request."
           )
 
-          history = [{"role": "system", "content": system_prompt}]
-          history.append({"role": "user", "content": f"User request: {user_text}"})
-
-          if isinstance(comments_res, list):
-              for c in comments_res[-6:]:
+          messages = [{"role": "system", "content": sys_prompt}]
+          if isinstance(comments_data, list):
+              for c in comments_data[-5:]:
                   role = "assistant" if "[bot]" in c.get("user", {}).get("login", "") else "user"
-                  history.append({"role": role, "content": c.get("body", "")})
+                  messages.append({"role": role, "content": c.get("body", "")})
+          messages.append({"role": "user", "content": user_text})
 
           res = client.chat.completions.create(
               model="deepseek-chat",
-              messages=history,
+              messages=messages,
               temperature=0.2
           )
 
-          reply = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
-          post_comment(reply)
+          answer = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
+          post_comment(answer)
 
-          with open("mode.txt", "w") as f:
-              f.write("DISCUSS")
+          with open("mode.txt", "w") as m:
+              m.write("DISCUSS")
           EOF
 
-      - name: Commit & Push Changes
+      - name: Commit and Push
         if: success()
         run: |
           MODE=$(cat mode.txt 2>/dev/null || echo "DISCUSS")
           if [ "$MODE" != "EXECUTE" ]; then
-            echo "In discussion mode. Skipping commit."
+            echo "Discussion step complete. Exiting."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          BRANCH_NAME="ai-fix-issue-${{ github.event.issue.number }}"
-          git checkout -B "$BRANCH_NAME"
+          BRANCH="ai-fix-issue-${{ github.event.issue.number }}"
+          git checkout -B "$BRANCH"
           git add -A
-          git commit -m "Fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes"
-          git push -u origin "$BRANCH_NAME" --force
+          git commit -m "AI fixes for #${{ github.event.issue.number }}" || echo "No changes detected."
+          git push -u origin "$BRANCH" --force
 
-      - name: Open Pull Request
+      - name: Create Pull Request
         id: cpr
         if: success()
         uses: peter-evans/create-pull-request@v6
@@ -210,12 +200,12 @@ jobs:
           branch: "ai-fix-issue-${{ github.event.issue.number }}"
           title: "Fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
           body: |
-            Closes #${{ github.event.issue.number }}.
+            Closes #${{ github.event.issue.number }}
             
-            ### Changes Applied
-            Autonomous updates applied by DeepSeek V3 based on discussion.
+            ### Summary
+            Applied autonomous updates from DeepSeek V3 based on issue discussion.
 
-      - name: Send Direct Push Notification
+      - name: Mention User on Complete
         if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -223,6 +213,11 @@ jobs:
           REPO_NAME: ${{ github.repository }}
           ACTOR: ${{ github.actor }}
         run: |
+          MODE=$(cat mode.txt 2>/dev/null || echo "DISCUSS")
+          if [ "$MODE" != "EXECUTE" ]; then
+            exit 0
+          fi
+
           python - << 'EOF'
           import os, requests
           token = os.environ["GITHUB_TOKEN"]
@@ -231,8 +226,7 @@ jobs:
           actor = os.environ["ACTOR"]
 
           headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-          url = f"[https://api.github.com/repos/](https://api.github.com/repos/){repo}/issues/{issue}/comments"
-          
-          body = f"@{actor} 🚀 **All tasks complete!** The Pull Request is open and ready for your review."
+          url = f"https://api.github.com/repos/{repo}/issues/{issue}/comments"
+          body = f"@{actor} 🚀 **All tasks completed!** Your Pull Request is open and ready to merge."
           requests.post(url, headers=headers, json={"body": body})
           EOF
