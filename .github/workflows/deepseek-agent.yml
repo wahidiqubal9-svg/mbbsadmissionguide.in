@@ -97,7 +97,7 @@ jobs:
           # MODE 1: EXECUTE (/apply)
           # -------------------------------------------------------------
           if "/apply" in user_text.lower():
-              post_comment("🤖 **Executing requested changes.** DeepSeek is updating files and creating the Pull Request...")
+              post_comment("🤖 **Executing requested changes.** DeepSeek is updating files and preparing the Pull Request...")
 
               prompt = (
                   "You are an autonomous senior developer.\n"
@@ -144,19 +144,23 @@ jobs:
           # MODE 2: DISCUSS & AUDIT
           # -------------------------------------------------------------
           sys_prompt = (
-              "You are an autonomous senior staff engineer and repository auditor acting like Google Jules.\n"
+              "You are an autonomous staff software engineer discussing repository improvements.\n"
+              "You do NOT have access to tool calling or terminal execution in this mode.\n"
               "You have direct access to the repository files attached below.\n\n"
               f"Codebase Files:\n{code_dump}\n\n"
-              "Inspect the code provided above directly. List exact issues, file names, and line fixes.\n"
-              "Never ask the user to provide or paste code—you already have it.\n"
-              "Reply in clean Markdown and tell the user to type '/apply' when they want the fixes pushed to a PR."
+              "Analyze the provided code and reply ONLY in clean, direct Markdown text.\n"
+              "Never output < | | DSML | | ... >, XML tags, tool invocations, or function calls.\n"
+              "Clearly explain what you propose to change, and instruct the user to type '/apply' to apply the changes."
           )
 
           messages = [{"role": "system", "content": sys_prompt}]
           if isinstance(comments_data, list):
               for c in comments_data[-5:]:
                   role = "assistant" if "[bot]" in c.get("user", {}).get("login", "") else "user"
-                  messages.append({"role": role, "content": c.get("body", "")})
+                  clean_body = re.sub(r"<\s*\|\s*\|\s*DSML.*?</\s*\|\s*\|\s*tool_calls\s*>", "", c.get("body", ""), flags=re.DOTALL).strip()
+                  clean_body = re.sub(r"<\|.*?\|>", "", clean_body).strip()
+                  if clean_body:
+                      messages.append({"role": role, "content": clean_body})
           messages.append({"role": "user", "content": user_text})
 
           res = client.chat.completions.create(
@@ -165,7 +169,10 @@ jobs:
               temperature=0.2
           )
 
-          answer = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
+          answer = res.choices[0].message.content
+          answer = re.sub(r"<\s*\|\s*\|\s*DSML.*?</\s*\|\s*\|\s*tool_calls\s*>", "", answer, flags=re.DOTALL).strip()
+          answer = re.sub(r"<\|.*?\|>", "", answer).strip()
+          answer = answer + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
           post_comment(answer)
 
           with open("mode.txt", "w") as m:
@@ -190,18 +197,19 @@ jobs:
 
           BRANCH="ai-fix-issue-${ISSUE_NUMBER}"
 
-          # Create and push to branch
           git checkout -B "$BRANCH"
           git add -A
           git commit -m "AI fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" || echo "No changes detected."
           git push -u origin "$BRANCH" --force
 
-          # Open PR targeting main
-          gh pr create \
+          # Open PR if it doesn't already exist
+          PR_URL=$(gh pr create \
             --base main \
             --head "$BRANCH" \
             --title "Fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" \
-            --body "Closes #${ISSUE_NUMBER}. Autonomous updates applied by DeepSeek V3." || echo "PR already created."
+            --body "Closes #${ISSUE_NUMBER}. Autonomous updates applied by DeepSeek V3." 2>/dev/null || gh pr view "$BRANCH" --json url -q .url)
+
+          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
 
       - name: Mention User on Complete
         if: success()
@@ -222,9 +230,10 @@ jobs:
           repo = os.environ["REPO_NAME"]
           issue = os.environ["ISSUE_NUMBER"]
           actor = os.environ["ACTOR"]
+          pr_url = os.environ.get("PR_URL", f"https://github.com/{repo}/pulls")
 
           headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
           url = f"https://api.github.com/repos/{repo}/issues/{issue}/comments"
-          body = f"@{actor} 🚀 **All tasks completed!** Your Pull Request is open and ready to merge."
+          body = f"@{actor} 🚀 **All tasks completed!**\n\n👉 **[Click here to review and merge your Pull Request]({pr_url})**"
           requests.post(url, headers=headers, json={"body": body})
           EOF
