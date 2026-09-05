@@ -24,6 +24,20 @@ const ALLOWED_BUDGETS = new Set([
   '5 – 8 Lakh',
   'Above 8 Lakh'
 ]);
+const ALLOWED_INDIA_PATHS = new Set([
+  'NEET UG / AIQ',
+  'State Counseling',
+  'Deemed Universities',
+  'NRI Quota'
+]);
+const ALLOWED_NEET_SCORES = new Set([
+  'Below 300',
+  '300 – 400',
+  '400 – 500',
+  '500 – 600',
+  '600 – 650',
+  'Above 650'
+]);
 
 function json(data, status = 200, origin = null) {
   const headers = new Headers(JSON_HEADERS);
@@ -111,17 +125,47 @@ export default {
     const name = String(lead?.name || '').trim();
     const phone = String(lead?.phone || '').trim();
     const neet = String(lead?.neet || '').trim();
-    const country = String(lead?.country || '').trim();
-    const budget = String(lead?.budget || '').trim();
+    const path = String(lead?.path || '').toLowerCase() === 'india' ? 'india' : 'abroad';
 
+    // Common validation
     if (
       !name || name.length > 100 ||
       !/^[0-9]{10}$/.test(phone) ||
-      !ALLOWED_NEET.has(neet) ||
-      !ALLOWED_COUNTRIES.has(country) ||
-      !ALLOWED_BUDGETS.has(budget)
+      !ALLOWED_NEET.has(neet)
     ) {
       return json({ ok: false, error: 'Please check your details and try again.' }, 400, origin || null);
+    }
+
+    // Path-specific validation & message building
+    let leadType = '';
+    let extraLines = [];
+
+    if (path === 'india') {
+      const indiaPath = String(lead?.indiaPath || '').trim();
+      const neetScore = String(lead?.neetScore || '').trim();
+
+      if (!ALLOWED_INDIA_PATHS.has(indiaPath) || !ALLOWED_NEET_SCORES.has(neetScore)) {
+        return json({ ok: false, error: 'Please check your details and try again.' }, 400, origin || null);
+      }
+
+      leadType = '🇮🇳 <b>New India MBBS Lead</b>';
+      extraLines = [
+        `🛣️ <b>Admission Route:</b> ${escapeHtml(indiaPath)}`,
+        `📊 <b>NEET Score:</b> ${escapeHtml(neetScore)}`
+      ];
+    } else {
+      const country = String(lead?.country || '').trim();
+      const budget = String(lead?.budget || '').trim();
+
+      if (!ALLOWED_COUNTRIES.has(country) || !ALLOWED_BUDGETS.has(budget)) {
+        return json({ ok: false, error: 'Please check your details and try again.' }, 400, origin || null);
+      }
+
+      leadType = '🌍 <b>New Abroad MBBS Lead</b>';
+      extraLines = [
+        `🌏 <b>Country:</b> ${escapeHtml(country)}`,
+        `💰 <b>Budget:</b> ${escapeHtml(budget)}`
+      ];
     }
 
     const botToken = env.TELEGRAM_BOT_TOKEN;
@@ -133,20 +177,21 @@ export default {
     }
 
     const message = [
-      '🎓 <b>New MBBS Abroad Lead</b>',
+      leadType,
       '━━━━━━━━━━━━━━━━━━',
       `👤 <b>Name:</b> ${escapeHtml(name)}`,
-      `📱 <b>Phone:</b> ${escapeHtml(phone)}`,
-      `📝 <b>NEET:</b> ${escapeHtml(neet)}`,
-      `🌍 <b>Country:</b> ${escapeHtml(country)}`,
-      `💰 <b>Budget:</b> ${escapeHtml(budget)}`,
+      `📱 <b>Phone:</b> <code>${escapeHtml(phone)}</code>`,
+      `📝 <b>NEET Status:</b> ${escapeHtml(neet)}`,
+      ...extraLines,
       '━━━━━━━━━━━━━━━━━━',
       `🕒 ${new Date().toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
         dateStyle: 'medium',
         timeStyle: 'short'
       })} IST`,
-      '📍 Source: mbbsadmissionguide.in'
+      '📍 Source: mbbsadmissionguide.in',
+      '',
+      `<a href="tel:+91${phone}">📞 Call Now</a> · <a href="https://wa.me/91${phone}">💬 WhatsApp</a>`
     ].join('\n');
 
     try {
