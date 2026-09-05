@@ -15,7 +15,7 @@ function json(data, status = 200) {
 }
 
 function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  return String(value ?? '').replace(/[&<>\"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[char]);
 }
@@ -102,6 +102,11 @@ export default {
         return json({ ok: false, error: 'Service is temporarily unavailable.' }, 500);
       }
 
+      // Sanitize phone for links (ensure only digits)
+      const sanitizedDigits = phone.replace(/\D/g, '');
+      const telLink = sanitizedDigits.length === 10 ? `+91${sanitizedDigits}` : `+91${sanitizedDigits}`;
+      const waLink = sanitizedDigits.length === 10 ? `91${sanitizedDigits}` : `91${sanitizedDigits}`;
+
       const timestamp = new Date().toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short'
       });
@@ -110,14 +115,14 @@ export default {
         leadType,
         '━━━━━━━━━━━━━━━━━━',
         `👤 <b>Name:</b> ${escapeHtml(name)}`,
-        `📱 <b>Phone:</b> <code>${escapeHtml(phone}</code>`,
+        `📱 <b>Phone:</b> <code>${escapeHtml(phone)}</code>`,
         `📝 <b>NEET Status:</b> ${escapeHtml(neet)}`,
         ...extraLines,
         '━━━━━━━━━━━━━━━━━━',
         `🕒 ${timestamp} IST`,
         '📍 Source: mbbsadmissionguide.in',
         '',
-        `<a href="tel:+91${phone}">📞 Call Now</a> · <a href="https://wa.me/91${phone}">💬 WhatsApp</a>`
+        `<a href="tel:${telLink}">📞 Call Now</a> · <a href="https://wa.me/${waLink}">💬 WhatsApp</a>`
       ].join('\n');
 
       try {
