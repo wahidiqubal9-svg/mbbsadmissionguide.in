@@ -27,9 +27,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install Dependencies
-        run: pip install openai aider-chat requests
+        run: pip install openai requests
 
-      - name: Process Discussion or Execution
+      - name: Run DeepSeek Agent
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
         run: |
           python - << 'EOF'
-          import os, sys, requests
+          import os, sys, json, requests
           from openai import OpenAI
 
           api_key = os.environ["DEEPSEEK_API_KEY"]
@@ -64,15 +64,77 @@ jobs:
               for c in comments_res:
                   conversation_text += f"{c.get('user', {}).get('login', 'User')}: {c.get('body', '')}\n"
 
+          client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
+          # -------------------------------------------------------------
+          # MODE 1: EXECUTE (/apply)
+          # -------------------------------------------------------------
           if "/apply" in user_text.lower():
-              post_comment("🤖 **Execution approved.** DeepSeek is applying changes across the repository. Creating branch and PR now...")
+              post_comment("🤖 **Execution approved.** DeepSeek is applying modifications directly to your repository files. Opening PR shortly...")
+
+              # Ingest target files (HTML/CSS/JS)
+              code_context = {}
+              code_exts = (".html", ".css", ".js")
+              for root, dirs, files in os.walk("."):
+                  dirs[:] = [d for d in dirs if not d.startswith(".") and d not in {"node_modules", "dist", "build"}]
+                  for f in files:
+                      if f.endswith(code_exts):
+                          fpath = os.path.relpath(os.path.join(root, f), ".")
+                          try:
+                              with open(fpath, "r", encoding="utf-8", errors="ignore") as file:
+                                  code_context[fpath] = file.read()
+                          except Exception:
+                              pass
+
+              exec_prompt = (
+                  "You are an expert autonomous software engineer.\n"
+                  "Based on the discussion thread below, implement the necessary code changes directly.\n"
+                  "Return your changes strictly as a valid JSON object where keys are the relative file paths "
+                  "and values are the complete updated file content.\n"
+                  "Do not include markdown code blocks, backticks, or any commentary outside the raw JSON object.\n"
+                  "Format:\n"
+                  '{"path/to/file.ext": "full modified content here"}\n\n'
+                  f"Task & Conversation:\n{conversation_text}\n\n"
+                  f"Existing Codebase:\n{json.dumps(code_context)}"
+              )
+
+              response = client.chat.completions.create(
+                  model="deepseek-chat",
+                  messages=[
+                      {"role": "system", "content": "You are a code execution engine that only outputs strict JSON."},
+                      {"role": "user", "content": exec_prompt}
+                  ],
+                  temperature=0.1
+              )
+
+              raw_json = response.choices[0].message.content.strip()
+              if raw_json.startswith("```json"):
+                  raw_json = raw_json[7:]
+              if raw_json.startswith("```"):
+                  raw_json = raw_json[3:]
+              if raw_json.endswith("```"):
+                  raw_json = raw_json[:-3]
+              raw_json = raw_json.strip()
+
+              try:
+                  files_to_write = json.loads(raw_json)
+                  for file_path, content in files_to_write.items():
+                      os.makedirs(os.path.dirname(file_path), exist_ok=True) if os.path.dirname(file_path) else None
+                      with open(file_path, "w", encoding="utf-8") as f:
+                          f.write(content)
+                  print(f"Successfully modified: {list(files_to_write.keys())}")
+              except Exception as e:
+                  post_comment(f"⚠️ Error applying changes: {str(e)}")
+                  sys.exit(1)
+
               with open("mode.txt", "w") as f:
                   f.write("EXECUTE")
-              with open("task_context.txt", "w", encoding="utf-8") as f:
-                  f.write(conversation_text)
               sys.exit(0)
 
-          ignored_dirs = {".git", ".github", "node_modules", "dist", "build", ".next", "vendor", "__pycache__"}
+          # -------------------------------------------------------------
+          # MODE 2: DISCUSS & AUDIT
+          # -------------------------------------------------------------
+          ignored_dirs = {".git", ".github", "node_modules", "dist", "build"}
           all_repo_files = []
           for root, dirs, files in os.walk("."):
               dirs[:] = [d for d in dirs if d not in ignored_dirs and not d.startswith(".")]
@@ -80,33 +142,24 @@ jobs:
                   if not f.startswith("."):
                       all_repo_files.append(os.path.relpath(os.path.join(root, f), "."))
 
-          tree_str = "\n".join(all_repo_files[:200])
+          tree_str = "\n".join(all_repo_files[:150])
 
           code_dump = ""
-          code_exts = (".html", ".css", ".js", ".jsx", ".ts", ".tsx", ".json", ".py", ".md")
-          total_bytes = 0
           for fpath in all_repo_files:
-              if fpath.endswith(code_exts) and total_bytes < 60000:
+              if fpath.endswith((".html", ".css", ".js")) and len(code_dump) < 50000:
                   try:
                       with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                          content = f.read(8000)
-                          total_bytes += len(content)
-                          code_dump += f"\n\n--- [FILE: {fpath}] ---\n{content}\n"
+                          code_dump += f"\n\n--- [FILE: {fpath}] ---\n{f.read(6000)}\n"
                   except Exception:
                       pass
 
-          client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-
           system_prompt = (
               "You are an autonomous staff engineer and repository auditor acting like Google Jules.\n"
-              "You have access to the complete codebase files provided below.\n\n"
-              f"Repository Tree:\n{tree_str}\n\n"
-              f"Code Contents:\n{code_dump}\n\n"
-              "Your mission:\n"
-              "1. When the user asks to inspect, audit, or fix discrepancies, analyze the repository.\n"
-              "2. Present a clear numbered list of findings with exact file names and line adjustments needed.\n"
-              "3. Ask the user which fixes they'd like, or instruct them to type '/apply' to fix all of them automatically.\n"
-              "4. If the user asks for specific custom modifications, discuss and plan them step-by-step."
+              "You have access to the repository tree and code contents below.\n\n"
+              f"Tree:\n{tree_str}\n\n"
+              f"Code:\n{code_dump}\n\n"
+              "Analyze issues clearly. Present concrete solutions. Invite the user to reply with refinements, "
+              "or type '/apply' to execute."
           )
 
           history = [{"role": "system", "content": system_prompt}]
@@ -123,24 +176,19 @@ jobs:
               temperature=0.2
           )
 
-          reply = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, fix discrepancies, and open a PR.*"
+          reply = res.choices[0].message.content + "\n\n---\n*Reply with refinements, or type **`/apply`** to branch, commit, and open a PR.*"
           post_comment(reply)
 
           with open("mode.txt", "w") as f:
               f.write("DISCUSS")
           EOF
 
-      - name: Apply Code with Aider
+      - name: Commit & Push Changes
         if: success()
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           MODE=$(cat mode.txt 2>/dev/null || echo "DISCUSS")
           if [ "$MODE" != "EXECUTE" ]; then
-            echo "In discussion mode. Skipping execution."
+            echo "In discussion mode. Skipping commit."
             exit 0
           fi
 
@@ -149,26 +197,8 @@ jobs:
 
           BRANCH_NAME="ai-fix-issue-${{ github.event.issue.number }}"
           git checkout -B "$BRANCH_NAME"
-
-          cat << 'EOF' > prompt.txt
-          You are an automated coding agent. Apply all requested code changes and fixes directly to the files.
-          Do NOT audit, discuss, or repeat analysis lines. Modify the files immediately to resolve the task.
-          
-          Task Details:
-          EOF
-          cat task_context.txt >> prompt.txt
-
-          aider \
-            --model deepseek/deepseek-chat \
-            --yes-always \
-            --no-check-update \
-            --no-auto-commits \
-            --no-show-release-notes \
-            --map-tokens 1024 \
-            --message-file prompt.txt
-
           git add -A
-          git commit -m "AI fixes for #${{ github.event.issue.number }}" || echo "No changes to commit"
+          git commit -m "Fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" || echo "No changes"
           git push -u origin "$BRANCH_NAME" --force
 
       - name: Open Pull Request
@@ -182,8 +212,8 @@ jobs:
           body: |
             Closes #${{ github.event.issue.number }}.
             
-            ### Changes Summary
-            Automated implementation and fixes completed by DeepSeek V3 based on discussion.
+            ### Changes Applied
+            Autonomous updates applied by DeepSeek V3 based on discussion.
 
       - name: Send Direct Push Notification
         if: success()
@@ -201,8 +231,8 @@ jobs:
           actor = os.environ["ACTOR"]
 
           headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-          url = f"https://api.github.com/repos/{repo}/issues/{issue}/comments"
+          url = f"[https://api.github.com/repos/](https://api.github.com/repos/){repo}/issues/{issue}/comments"
           
-          body = f"@{actor} 🚀 **Work complete!** The Pull Request has been created and is ready for your review."
+          body = f"@{actor} 🚀 **All tasks complete!** The Pull Request is open and ready for your review."
           requests.post(url, headers=headers, json={"body": body})
           EOF
