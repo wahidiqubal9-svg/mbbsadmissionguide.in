@@ -10,6 +10,7 @@ const ALLOWED_ORIGINS = new Set([
 
 const ALLOWED_NEET = new Set(['Qualified', 'Appearing 2026', 'Not Appeared']);
 const ALLOWED_COUNTRIES = new Set([
+  'Bangladesh',
   'Russia',
   'Georgia',
   'Kazakhstan',
@@ -25,18 +26,18 @@ const ALLOWED_BUDGETS = new Set([
   'Above 8 Lakh'
 ]);
 const ALLOWED_INDIA_PATHS = new Set([
-  'NEET UG / AIQ',
-  'State Counseling',
-  'Deemed Universities',
-  'NRI Quota'
+  'Govt College',
+  'Private College',
+  'Deemed University',
+  'NRI Quota',
+  'Not Sure'
 ]);
 const ALLOWED_NEET_SCORES = new Set([
-  'Below 300',
-  '300 – 400',
+  'Below 400',
   '400 – 500',
   '500 – 600',
   '600 – 650',
-  'Above 650'
+  '650+'
 ]);
 
 function json(data, status = 200, origin = null) {
@@ -145,6 +146,8 @@ export default {
       const neetScore = String(lead?.neetScore || '').trim();
 
       if (!ALLOWED_INDIA_PATHS.has(indiaPath) || !ALLOWED_NEET_SCORES.has(neetScore)) {
+        // Log invalid values to help debugging
+        console.error('Invalid indiaPath/neetscore', { indiaPath, neetScore, origin });
         return json({ ok: false, error: 'Please check your details and try again.' }, 400, origin || null);
       }
 
