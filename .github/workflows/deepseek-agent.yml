@@ -8,8 +8,6 @@ on:
 
 jobs:
   agent:
-    # 1. Never run on Pull Request comments
-    # 2. Never trigger for any automated bots (Cloudflare, GitHub actions, etc.)
     if: |
       !github.event.issue.pull_request &&
       !endsWith(github.actor, '[bot]') &&
@@ -45,7 +43,7 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body || github.event.issue.body }}
         run: |
           python - << 'EOF'
-          import os, sys, re, json, requests
+          import os, sys, re, requests
           from openai import OpenAI
 
           api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
@@ -68,7 +66,6 @@ jobs:
           def post_comment(text):
               requests.post(comment_url, headers=headers, json={"body": text})
 
-          # Ingest Issue Discussion
           issue_data = requests.get(f"https://api.github.com/repos/{repo}/issues/{issue_no}", headers=headers).json()
           comments_data = requests.get(comment_url, headers=headers).json()
 
@@ -79,7 +76,6 @@ jobs:
                   if "[bot]" not in login:
                       convo += f"{login}: {c.get('body', '')}\n"
 
-          # Ingest Repositories Files (ignoring large/irrelevant directories)
           code_dump = ""
           valid_exts = (".html", ".css", ".js", ".json", ".md")
           skip_dirs = {".git", ".github", "node_modules", "dist", "build"}
@@ -97,9 +93,9 @@ jobs:
 
           client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-          # -----------------------------------------------------------------
-          # EXECUTE MODE (/apply)
-          # -----------------------------------------------------------------
+          # -------------------------------------------------------------
+          # MODE 1: EXECUTE (/apply)
+          # -------------------------------------------------------------
           if "/apply" in user_text.lower():
               post_comment("🤖 **Executing requested changes.** DeepSeek is updating files and creating the Pull Request...")
 
@@ -109,17 +105,17 @@ jobs:
                   f"Conversation History:\n{convo}\n\n"
                   f"Codebase:\n{code_dump}\n\n"
                   "INSTRUCTION:\n"
-                  "Provide the FULL updated content of every modified file using this format:\n\n"
+                  "Provide the FULL updated content of every modified file using this exact format:\n\n"
                   "===FILE: path/to/file.ext===\n"
                   "[complete updated file content]\n"
                   "===END FILE===\n\n"
-                  "Do NOT output markdown blocks, explanations, or backticks around the delimiters."
+                  "Do NOT output markdown blocks, explanations, backticks, or DSML around the delimiters."
               )
 
               res = client.chat.completions.create(
                   model="deepseek-chat",
                   messages=[
-                      {"role": "system", "content": "You are a code deployment engine that strictly outputs delimited file blocks."},
+                      {"role": "system", "content": "You are a code deployment engine that strictly outputs delimited file blocks without commentary."},
                       {"role": "user", "content": prompt}
                   ],
                   temperature=0.1
@@ -129,7 +125,7 @@ jobs:
               matches = re.findall(r"===FILE:\s*(.+?)===\s*\n(.*?)===END FILE===", out, re.DOTALL)
 
               if not matches:
-                  post_comment("⚠️ DeepSeek did not output delimited files. Please provide more explicit instructions.")
+                  post_comment("⚠️ No delimited file changes were generated. Please provide more explicit instructions.")
                   sys.exit(1)
 
               for fpath, body in matches:
@@ -144,13 +140,15 @@ jobs:
                   m.write("EXECUTE")
               sys.exit(0)
 
-          # -----------------------------------------------------------------
-          # DISCUSS MODE
-          # -----------------------------------------------------------------
+          # -------------------------------------------------------------
+          # MODE 2: DISCUSS & AUDIT
+          # -------------------------------------------------------------
           sys_prompt = (
               "You are an autonomous repository auditor and senior developer.\n"
-              "Inspect the code, outline clear findings, and suggest exact file adjustments.\n"
-              "Ask the user for adjustments, or instruct them to type '/apply' to build and open a Pull Request."
+              "You do NOT have bash terminal access or tool-calling functions.\n"
+              "Analyze the provided code and reply ONLY in clean, standard Markdown.\n"
+              "Never output DSML tags, tool calls, or XML blocks.\n"
+              "Outline findings clearly and tell the user to type '/apply' when ready."
           )
 
           messages = [{"role": "system", "content": sys_prompt}]
@@ -173,8 +171,12 @@ jobs:
               m.write("DISCUSS")
           EOF
 
-      - name: Commit and Push
+      - name: Commit, Push and Open Pull Request
         if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           MODE=$(cat mode.txt 2>/dev/null || echo "DISCUSS")
           if [ "$MODE" != "EXECUTE" ]; then
@@ -185,25 +187,20 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          BRANCH="ai-fix-issue-${{ github.event.issue.number }}"
+          BRANCH="ai-fix-issue-${ISSUE_NUMBER}"
+
+          # Create and push to branch
           git checkout -B "$BRANCH"
           git add -A
-          git commit -m "AI fixes for #${{ github.event.issue.number }}" || echo "No changes detected."
+          git commit -m "AI fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" || echo "No changes detected."
           git push -u origin "$BRANCH" --force
 
-      - name: Create Pull Request
-        id: cpr
-        if: success()
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "ai-fix-issue-${{ github.event.issue.number }}"
-          title: "Fixes for #${{ github.event.issue.number }}: ${{ github.event.issue.title }}"
-          body: |
-            Closes #${{ github.event.issue.number }}
-            
-            ### Summary
-            Applied autonomous updates from DeepSeek V3 based on issue discussion.
+          # Open PR explicitly targeting main from the new branch
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "Fixes for #${ISSUE_NUMBER}: ${ISSUE_TITLE}" \
+            --body "Closes #${ISSUE_NUMBER}. Autonomous updates applied by DeepSeek V3." || echo "PR already created."
 
       - name: Mention User on Complete
         if: success()
