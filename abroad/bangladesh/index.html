@@ -95,7 +95,7 @@
   .testi-head small{font-size:11px;color:var(--muted)}
   .stars{color:var(--gold);font-size:12px;margin-bottom:8px;letter-spacing:.15em}
   .testi p{margin:0;font-size:13px;color:#3C4A5A;line-height:1.6;font-style:italic}
-  .testi-badge{position:absolute;top:12px;left:12px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(0,106,78,.1);color:var(--bd-green);border:1px solid rgba(0,106,78,.3)}
+  .testi-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;margin-bottom:10px;border-radius:999px;background:rgba(0,106,78,.1);color:var(--bd-green);border:1px solid rgba(0,106,78,.3)}
 
   /* Other countries */
   .other-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -266,6 +266,24 @@
     <div class="hero-stats"><div class="stat"><b>55%+</b><span>FMGE Pass Rate</span></div><div class="stat"><b>₹23.5L</b><span>5-Yr Total</span></div><div class="stat"><b>60+</b><span>NMC Colleges</span></div></div>
   </div></div></section>
 
+  <!-- LEAD FORM (pre-configured for Bangladesh) -->
+  <div class="lead-card reveal" id="lead">
+    <h3 class="serif">Get Bangladesh college shortlist</h3>
+    <p>A doctor-founder will share NMC-approved Bangladesh colleges matching your NEET score & budget.</p>
+    <form id="leadFormEl" onsubmit="submitLead(event)">
+      <input type="hidden" id="leadPath" value="abroad" />
+      <input type="hidden" id="countrySelect" value="Bangladesh" />
+      <div class="form-row"><input type="text" class="input" id="leadName" placeholder="Full Name *" required /></div>
+      <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{10}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
+      <div class="form-row two">
+        <select id="leadBudget" required><option value="">Budget (5 yrs)</option><option>Under 20 Lakh</option><option>20 – 30 Lakh</option><option>30 – 40 Lakh</option><option>Flexible</option></select>
+        <select id="leadState"><option value="">Your State</option><option>West Bengal</option><option>Bihar</option><option>Jharkhand</option><option>Uttar Pradesh</option><option>Delhi NCR</option><option>Maharashtra</option><option>Other</option></select>
+      </div>
+      <button type="submit" class="btn-gold" id="leadSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Get Bangladesh College List</button>
+      <div class="form-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Confidential · Handled by our doctors</div>
+    </form>
+  </div>
+
   <!-- WHY BANGLADESH -->
   <section class="section" id="why"><div class="wrap">
     <div class="shead reveal"><div class="eyebrow">01 · Why Bangladesh</div><h2>Why Indian students are choosing Bangladesh.</h2><p class="sub">A curriculum nearly identical to India's — taught in English, with clinical exposure from year one.</p></div>
@@ -311,7 +329,6 @@
       <div class="uni"><div class="uni-logo">CB</div><div class="uni-info"><h4>Community Based Med. College</h4><div class="meta"><span>Gazipur</span><span>Est. 2006</span><span>★ 4.6</span></div></div><div class="uni-price"><b>₹3.2L</b><small>per year</small></div></div>
       <div class="uni"><div class="uni-logo">US</div><div class="uni-info"><h4>University of Science & Tech</h4><div class="meta"><span>Dhaka</span><span>Est. 2008</span><span>★ 4.5</span></div></div><div class="uni-price"><b>₹3.4L</b><small>per year</small></div></div>
     </div>
-    <div class="note-dash">📌 <b>CEO note:</b> Add more colleges using the same <code>&lt;div class="uni"&gt;</code> block. Each should be NMC-listed and verified by Dr. Imtiyaz.</div>
   </div></section>
 
   <!-- COST BREAKDOWN -->
@@ -425,24 +442,6 @@
       <a href="/abroad/philippines/" class="other-country"><span class="flag">🇵🇭</span>Philippines<small>US Pattern</small></a>
     </div>
   </div></section>
-
-  <!-- LEAD FORM (pre-configured for Bangladesh) -->
-  <div class="lead-card reveal" id="lead">
-    <h3 class="serif">Get Bangladesh college shortlist</h3>
-    <p>A doctor-founder will share NMC-approved Bangladesh colleges matching your NEET score & budget.</p>
-    <form id="leadFormEl" onsubmit="submitLead(event)">
-      <input type="hidden" id="leadPath" value="abroad" />
-      <input type="hidden" id="countrySelect" value="Bangladesh" />
-      <div class="form-row"><input type="text" class="input" id="leadName" placeholder="Full Name *" required /></div>
-      <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{10}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
-      <div class="form-row two">
-        <select id="leadBudget" required><option value="">Budget (5 yrs)</option><option>Under 20 Lakh</option><option>20 – 30 Lakh</option><option>30 – 40 Lakh</option><option>Flexible</option></select>
-        <select id="leadState"><option value="">Your State</option><option>West Bengal</option><option>Bihar</option><option>Jharkhand</option><option>Uttar Pradesh</option><option>Delhi NCR</option><option>Maharashtra</option><option>Other</option></select>
-      </div>
-      <button type="submit" class="btn-gold" id="leadSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Get Bangladesh College List</button>
-      <div class="form-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Confidential · Handled by our doctors</div>
-    </form>
-  </div>
 
   <!-- CTA -->
   <div class="cta-banner reveal">
