@@ -44,6 +44,12 @@ async function submitLead(e){
   const details={name:get('leadName').trim(),phone:get('leadPhone').trim(),neet:get('leadNeet'),path:get('leadPath')||currentPath};
   if(details.path==='india'){details.indiaPath=get('indiaPath');details.neetScore=get('indiaScore');}
   else{details.country=get('countrySelect');details.budget=get('leadBudget');}
+  const aliases={Name:'name',Phone:'phone',Neet:'neet',Budget:'budget',State:'state',Path:'path',countrySelect:'country',indiaScore:'neetScore'};
+  e.target.querySelectorAll('input,select,textarea').forEach(el=>{
+    if(!el.id||!el.value||el.value==='')return;
+    const k=aliases[el.id.replace(/^lead/,'')]||el.id.replace(/^lead/,'');
+    if(!(k in details))details[k]=el.value.trim();
+  });
   try{
     const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});
     const data=await res.json().catch(()=>({}));
