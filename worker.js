@@ -20,6 +20,37 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function clean(value, max = 200) {
+  return String(value ?? '').trim().slice(0, max);
+}
+
+/* Friendly labels for common form fields. Any field that is not listed
+   here is still shown in the Telegram message, just with its own name. */
+const FIELD_LABELS = {
+  'name':        '👤 Name',
+  'phone':       '📱 Phone',
+  'neet':        '📝 NEET Status',
+  'indiapath':   '🛣️ Admission Route',
+  'neetscore':   '📊 NEET Score',
+  'country':     '🌏 Country',
+  'state':       '📍 State',
+  'city':        '🏙️ City',
+  'budget':      '💰 Budget',
+  'college':     '🏥 College',
+  'university':  '🎓 University',
+  'course':      '📚 Course',
+  'message':     '💬 Message',
+  'note':        '💬 Note',
+  'comment':     '💬 Comment',
+};
+
+/* Fields that are used for routing/headers, never printed as their own line. */
+const META_KEYS = new Set(['path', 'form', 'source', 'website']);
+
+function formatKey(key) {
+  return String(key).replace(/[_-]+/g, ' ');
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -37,88 +68,64 @@ export default {
       catch { return json({ ok: false, error: 'Invalid request' }, 400); }
 
       // Honeypot - silently accept bots
-      if (String(lead?.website || '').trim()) return json({ ok: true });
+      if (clean(lead?.website)) return json({ ok: true });
 
-      // Common fields
-      const name  = String(lead?.name || '').trim();
-      const phone = String(lead?.phone || '').trim();
-      const neet  = String(lead?.neet || '').trim();
-      const path  = (String(lead?.path || '').toLowerCase() === 'india') ? 'india' : 'abroad';
+      const name  = clean(lead?.name, 100);
+      const phone = clean(lead?.phone, 20);
+      const path  = clean(lead?.path).toLowerCase() === 'india' ? 'india' : 'abroad';
 
-      // Common validation
-      if (!name || name.length > 100) {
-        return json({ ok: false, error: 'Please enter your name.' }, 400);
-      }
+      // Only real humans with a name + 10-digit mobile are forwarded.
+      if (!name) return json({ ok: false, error: 'Please enter your name.' }, 400);
       if (!/^[0-9]{10}$/.test(phone)) {
         return json({ ok: false, error: 'Please enter a valid 10-digit mobile number.' }, 400);
       }
-      if (!neet || neet.length > 50) {
-        return json({ ok: false, error: 'Please select your NEET status.' }, 400);
+
+      // Build the message: every filled-in field becomes one line.
+      const lines = [];
+      for (const [key, raw] of Object.entries(lead)) {
+        const value = clean(raw);
+        if (!value) continue;
+        const lk = key.toLowerCase();
+        if (META_KEYS.has(lk)) continue;
+        const label = FIELD_LABELS[lk];
+        if (label) {
+          lines.push(`<b>${label}:</b> ${escapeHtml(value)}`);
+        } else {
+          const shown = formatKey(key);
+          lines.push(`<b>${escapeHtml(shown.charAt(0).toUpperCase() + shown.slice(1))}:</b> ${escapeHtml(value)}`);
+        }
       }
 
-      // Path-specific validation & message building
-      let extraLines = [];
-      let leadType = '';
+      if (!lines.length) return json({ ok: false, error: 'Please fill in your details.' }, 400);
 
-      if (path === 'india') {
-        const indiaPath = String(lead?.indiaPath || '').trim();
-        const neetScore = String(lead?.neetScore || '').trim();
-
-        if (!indiaPath || indiaPath.length > 60) {
-          return json({ ok: false, error: 'Please select your preferred India admission route.' }, 400);
-        }
-        if (!neetScore || neetScore.length > 30) {
-          return json({ ok: false, error: 'Please select your NEET score range.' }, 400);
-        }
-
-        leadType = '🇮🇳 <b>New India MBBS Lead</b>';
-        extraLines = [
-          `🛣️ <b>Admission Route:</b> ${escapeHtml(indiaPath)}`,
-          `📊 <b>NEET Score:</b> ${escapeHtml(neetScore)}`
-        ];
-      } else {
-        const country = String(lead?.country || '').trim();
-        const budget  = String(lead?.budget || '').trim();
-
-        if (!country || country.length > 50) {
-          return json({ ok: false, error: 'Please select your preferred country.' }, 400);
-        }
-        if (!budget || budget.length > 50) {
-          return json({ ok: false, error: 'Please select your budget.' }, 400);
-        }
-
-        leadType = '🌍 <b>New Abroad MBBS Lead</b>';
-        extraLines = [
-          `🌏 <b>Country:</b> ${escapeHtml(country)}`,
-          `💰 <b>Budget:</b> ${escapeHtml(budget)}`
-        ];
-      }
-
-      // Telegram secrets
-      const botToken = env.TELEGRAM_BOT_TOKEN;
-      const chatId = env.TELEGRAM_CHAT_ID;
-      if (!botToken || !chatId) {
-        console.error('Telegram secrets are not configured');
-        return json({ ok: false, error: 'Service is temporarily unavailable.' }, 500);
-      }
+      let heading;
+      if (path === 'india') heading = '🇮🇳 <b>New India Lead</b>';
+      else if (clean(lead.country)) heading = '🌍 <b>New Abroad Lead</b>';
+      else heading = '🔔 <b>New Lead</b>';
+      const formName = clean(lead.form) || clean(lead.source);
+      if (formName) heading += ` · ${escapeHtml(formName)}`;
 
       const timestamp = new Date().toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short'
       });
 
       const message = [
-        leadType,
+        heading,
         '━━━━━━━━━━━━━━━━━━',
-        `👤 <b>Name:</b> ${escapeHtml(name)}`,
-        `📱 <b>Phone:</b> <code>${escapeHtml(phone)}</code>`,
-        `📝 <b>NEET Status:</b> ${escapeHtml(neet)}`,
-        ...extraLines,
+        ...lines,
         '━━━━━━━━━━━━━━━━━━',
         `🕒 ${timestamp} IST`,
         '📍 Source: mbbsadmissionguide.in',
         '',
         `<a href="tel:+91${phone}">📞 Call Now</a> · <a href="https://wa.me/91${phone}">💬 WhatsApp</a>`
       ].join('\n');
+
+      const botToken = env.TELEGRAM_BOT_TOKEN;
+      const chatId = env.TELEGRAM_CHAT_ID;
+      if (!botToken || !chatId) {
+        console.error('Telegram secrets are not configured');
+        return json({ ok: false, error: 'Service is temporarily unavailable.' }, 500);
+      }
 
       try {
         const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
