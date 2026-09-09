@@ -10,7 +10,7 @@
     "audience": "Both (men & women)",
     "session": "2025-26",
     "feeUsd": 33000,
-    "feeIntro": "Official stated 5-year course fee of USD 33,000, covering admission, tuition, session and hostel.",
+    "feeIntro": "USD 33,000 for the five-year course — admission, tuition, session and hostel are all included. Food and utilities are paid separately.",
     "covers": [
       "Admission fee",
       "Tuition fee",
@@ -19,23 +19,44 @@
       "Free internship training (on application)"
     ],
     "notCovered": [
-      "Food (approx. USD 40/month)",
-      "Utility bill (approx. USD 20/month)",
+      "Food — separate mess charge (about USD 40/month)",
+      "Utility bill (about USD 20/month)",
       "Hostel security deposit USD 100 (non-refundable)",
-      "BM&DC and Khulna Medical University registration fees",
+      "BM&DC and Khulna Medical University registration",
       "VAT, where applicable"
     ],
-    "internship": "The college hospital provides free internship training for foreign graduates who apply. No salary/honorarium is paid during internship.",
-    "hostel": "Hostel included in the stated fee.",
-    "food": "Not included. Charged separately (approx. USD 40/month).",
+    "internship": "Free internship training at the college hospital is offered to foreign graduates who apply. No salary or honorarium is paid during the internship year.",
+    "hostel": "Included in the five-year fee.",
+    "food": "Not included — separate mess charge (about USD 40/month).",
     "payment": [
-      ["Booking", 5000],
-      ["Admission", 8000],
-      ["Remaining course fee", 20000],
-      ["15 January 2026", 5000],
-      ["15 January 2027", 5000],
-      ["15 January 2028", 5000],
-      ["15 January 2029", 5000]
+      [
+        "Booking",
+        5000
+      ],
+      [
+        "Admission",
+        8000
+      ],
+      [
+        "Remaining course fee",
+        20000
+      ],
+      [
+        "15 January 2026",
+        5000
+      ],
+      [
+        "15 January 2027",
+        5000
+      ],
+      [
+        "15 January 2028",
+        5000
+      ],
+      [
+        "15 January 2029",
+        5000
+      ]
     ],
     "notes": "Remaining USD 20,000 is paid in four equal installments of USD 5,000 on 15 January each year from 2026 to 2029.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -51,7 +72,7 @@
     "audience": "Both (men & women)",
     "session": "2025-26",
     "feeUsd": 35000,
-    "feeIntro": "Official stated 5-year course fee of USD 35,000, covering the relevant admission, tuition, session and hostel components.",
+    "feeIntro": "USD 35,000 for five years — admission, tuition, session and hostel are covered, and internship training is free on application. Food is extra.",
     "covers": [
       "Admission fee",
       "Tuition fee",
@@ -60,19 +81,37 @@
       "Free internship training (on application)"
     ],
     "notCovered": [
-      "Food (not specified in the fee document)",
-      "Utility and other costs as applicable"
+      "Food (extra — mess charged separately)",
+      "Hostel utility and incidental costs"
     ],
-    "internship": "Free internship training is offered to foreign graduates who apply. No salary/honorarium is paid during internship.",
-    "hostel": "Hostel included in the stated fee.",
-    "food": "Not specified in the document.",
+    "internship": "Free internship training is offered to foreign graduates who apply. No salary or honorarium is paid during the internship year.",
+    "hostel": "Included in the five-year fee.",
+    "food": "Not included in the fee — charged separately at the hostel mess.",
     "payment": [
-      ["Booking", 8000],
-      ["At admission", 10000],
-      ["15 January 2026", 4250],
-      ["15 January 2027", 4250],
-      ["15 January 2028", 4250],
-      ["15 January 2029", 4250]
+      [
+        "Booking",
+        8000
+      ],
+      [
+        "At admission",
+        10000
+      ],
+      [
+        "15 January 2026",
+        4250
+      ],
+      [
+        "15 January 2027",
+        4250
+      ],
+      [
+        "15 January 2028",
+        4250
+      ],
+      [
+        "15 January 2029",
+        4250
+      ]
     ],
     "notes": "Remaining course fee is USD 17,000, payable in four equal installments of USD 4,250 from 15 January 2026 to 2029.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -88,7 +127,7 @@
     "audience": "Both (men & women)",
     "session": "2024-25",
     "feeUsd": 40000,
-    "feeIntro": "Official stated total of USD 40,000 for the 5-year course, which includes development fee, tuition fees, registration fees and accommodation.",
+    "feeIntro": "USD 40,000 for the five-year course — development fee, tuition, registration and accommodation are included. Food and internship costs are extra.",
     "covers": [
       "Development fee",
       "Tuition fees",
@@ -96,21 +135,45 @@
       "Accommodation"
     ],
     "notCovered": [
-      "Food (not stated as included)",
-      "Internship fee (not clearly priced separately in the document)"
+      "Food (extra — mess charged separately)",
+      "Internship expenses (outside the course fee)"
     ],
-    "internship": "Not clearly priced separately in the fee document - confirm current internship terms with the college.",
-    "hostel": "Accommodation included in the stated total.",
-    "food": "Not stated as included.",
+    "internship": "Internship is not covered by the USD 40,000 course fee.",
+    "hostel": "Accommodation is included in the total.",
+    "food": "Not included — mess charges are separate.",
     "payment": [
-      ["Seat booking", 5000],
-      ["Within 10 October 2025", 4000],
-      ["Within 10 April 2026", 4000],
-      ["Within 10 October 2026", 3500],
-      ["Within 10 April 2027", 3500],
-      ["Within 10 October 2027", 3500],
-      ["Within 10 April 2028", 3500],
-      ["Within 10 October 2028", 3000]
+      [
+        "Seat booking",
+        5000
+      ],
+      [
+        "Within 10 October 2025",
+        4000
+      ],
+      [
+        "Within 10 April 2026",
+        4000
+      ],
+      [
+        "Within 10 October 2026",
+        3500
+      ],
+      [
+        "Within 10 April 2027",
+        3500
+      ],
+      [
+        "Within 10 October 2027",
+        3500
+      ],
+      [
+        "Within 10 April 2028",
+        3500
+      ],
+      [
+        "Within 10 October 2028",
+        3000
+      ]
     ],
     "notes": "The listed amounts are non-refundable. Confirm the complete installment structure with the college before payment.",
     "eligibility": "NEET qualification is required. Students must obtain an equivalence certificate from DG Health."
@@ -126,7 +189,7 @@
     "audience": "Both (men & women)",
     "session": "2024-25",
     "feeUsd": 40000,
-    "feeIntro": "Official stated total of USD 40,000 for 5 years, including admission & other fees, 1st-year charges, tuition, session fees, university registration, government registration and hostel rent.",
+    "feeIntro": "USD 40,000 for five years — admission and other fees, 1st-year charges, tuition, session fees, university and government registration, and hostel rent are all included. Food is extra.",
     "covers": [
       "Admission and other fees",
       "1st-year charges",
@@ -137,18 +200,33 @@
       "Hostel rent"
     ],
     "notCovered": [
-      "Food (not specified)",
-      "Registration / other fees payable according to rules"
+      "Food (extra — mess charged separately)",
+      "Registration or other fees payable under university rules"
     ],
-    "internship": "Not specified in the fee document.",
-    "hostel": "Hostel rent included in the stated total.",
-    "food": "Not specified.",
+    "internship": "Internship is not covered by the course fee.",
+    "hostel": "Hostel rent is included in the total.",
+    "food": "Not included in the fee — mess is paid separately.",
     "payment": [
-      ["Admission & 1st-year charges", 17000],
-      ["2nd year", 5000],
-      ["3rd year", 6000],
-      ["4th year", 6000],
-      ["5th year", 6000]
+      [
+        "Admission & 1st-year charges",
+        17000
+      ],
+      [
+        "2nd year",
+        5000
+      ],
+      [
+        "3rd year",
+        6000
+      ],
+      [
+        "4th year",
+        6000
+      ],
+      [
+        "5th year",
+        6000
+      ]
     ],
     "notes": "Seat confirmation requires USD 5,000 (non-refundable). Admission confirmation is USD 12,000, adjusted against admission/other fees.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -164,11 +242,11 @@
     "audience": "Both (men & women)",
     "session": "2024-25",
     "feeUsd": 41000,
-    "feeIntro": "Official stated total of USD 41,000 for 5 years - USD 36,500 course fee plus USD 4,500 hostel.",
+    "feeIntro": "USD 41,000 for five years — a USD 36,500 course fee plus USD 4,500 for the hostel.",
     "covers": [
       "Development, admission, session and tuition fees",
       "Laboratory and extra-academic fees",
-      "BM&DC / other fee components (as listed by the college)",
+      "BM&DC and other fee components",
       "Hostel (USD 4,500 of the total)"
     ],
     "notCovered": [
@@ -179,16 +257,34 @@
       "Internship fee USD 2,000 (refunded at the end of internship)",
       "Internship hostel fee USD 900 for one year"
     ],
-    "internship": "USD 2,000 internship fee is payable and refunded at the end of the internship period. Internship hostel fee is USD 900 for one year.",
-    "hostel": "Hostel USD 4,500 included in the total; meals and electricity are extra.",
-    "food": "Hostel meal is extra.",
+    "internship": "A USD 2,000 internship fee is payable and refunded at the end of the internship period. Internship hostel costs USD 900 for the one-year posting.",
+    "hostel": "Hostel (USD 4,500) is included in the total; meals and electricity are extra.",
+    "food": "Not included — hostel meal plan is billed separately.",
     "payment": [
-      ["Booking", 3000],
-      ["Admission", 13000],
-      ["January 2026", 9000],
-      ["July 2027", 4000],
-      ["January 2028", 4000],
-      ["July 2028", 4000]
+      [
+        "Booking",
+        3000
+      ],
+      [
+        "Admission",
+        13000
+      ],
+      [
+        "January 2026",
+        9000
+      ],
+      [
+        "July 2027",
+        4000
+      ],
+      [
+        "January 2028",
+        4000
+      ],
+      [
+        "July 2028",
+        4000
+      ]
     ],
     "notes": "Irregular students pay additional tuition/hostel charges. Confirm the balance of the payment schedule with the college.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -204,7 +300,7 @@
     "audience": "Women only",
     "session": "2025-26",
     "feeUsd": 42000,
-    "feeIntro": "Official stated total of USD 42,000 for the 5-year MBBS, with the fee breakup printed below.",
+    "feeIntro": "USD 42,000 total for the five-year MBBS. The full fee breakup is set out on this page.",
     "covers": [
       "One-time development fee (USD 12,000)",
       "Admission fee (USD 4,300)",
@@ -213,29 +309,59 @@
       "Hostel rent USD 65 x 60 months (USD 3,900)"
     ],
     "notCovered": [
-      "Food (approx. USD 40/month)",
-      "Utility bill (approx. USD 20/month)",
+      "Food (about USD 40/month)",
+      "Utility bill (about USD 20/month)",
       "Hostel security USD 100 (non-refundable)",
-      "BM&DC and university registration fees (as per the authority)",
+      "BM&DC and university registration fees",
       "VAT where required",
-      "Internship fee USD 2,000 (not included)"
+      "Internship fee USD 2,000"
     ],
-    "internship": "USD 2,000 internship fee, explicitly not included in the course fee.",
-    "hostel": "Hostel included (rent USD 3,900 over 5 years); food and utilities extra.",
-    "food": "Not included. Approx. USD 40/month.",
+    "internship": "A USD 2,000 internship fee applies and is not part of the course fee.",
+    "hostel": "Hostel is included (rent USD 3,900 across five years); food and utilities are extra.",
+    "food": "Not included — around USD 40/month at the hostel mess.",
     "breakdown": [
-      ["One-time development fee", 12000],
-      ["Admission fee", 4300],
-      ["Tuition (USD 350 x 60 months)", 21000],
-      ["Hostel establishment fee", 700],
-      ["Hostel rent (USD 65 x 60 months)", 3900],
-      ["Other fees", 100]
+      [
+        "One-time development fee",
+        12000
+      ],
+      [
+        "Admission fee",
+        4300
+      ],
+      [
+        "Tuition (USD 350 x 60 months)",
+        21000
+      ],
+      [
+        "Hostel establishment fee",
+        700
+      ],
+      [
+        "Hostel rent (USD 65 x 60 months)",
+        3900
+      ],
+      [
+        "Other fees",
+        100
+      ]
     ],
     "payment": [
-      ["Booking", 5000],
-      ["At admission", 10000],
-      ["Within six months", 6350],
-      ["Remaining (7 installments of USD 2,950)", 20650]
+      [
+        "Booking",
+        5000
+      ],
+      [
+        "At admission",
+        10000
+      ],
+      [
+        "Within six months",
+        6350
+      ],
+      [
+        "Remaining (7 installments of USD 2,950)",
+        20650
+      ]
     ],
     "notes": "This is a women-only medical college.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -251,7 +377,7 @@
     "audience": "Women only",
     "session": "2025-26",
     "feeUsd": 43000,
-    "feeIntro": "Official stated 5-year course fee of USD 43,000, covering admission, tuition, session and hostel.",
+    "feeIntro": "USD 43,000 for five years — admission, tuition, session and hostel are covered, and internship training is free on application. Food and utilities are extra.",
     "covers": [
       "Admission fee",
       "Tuition fee",
@@ -260,16 +386,16 @@
       "Free internship training (on application)"
     ],
     "notCovered": [
-      "Food (not included)",
-      "Utility bill (approx. USD 30/month)",
-      "Electricity for AC rooms (charged on actual meter usage)",
+      "Food (extra — mess charged separately)",
+      "Utility bill (about USD 30/month)",
+      "Electricity for AC rooms (metered separately)",
       "Hostel security USD 250 (non-refundable)",
-      "BM&DC and University of Dhaka registration fees",
-      "VAT where applicable"
+      "BM&DC and University of Dhaka registration",
+      "VAT, where applicable"
     ],
-    "internship": "Free internship training is available for foreign graduates who apply. No salary/honorarium is paid during internship.",
-    "hostel": "Hostel included in the stated fee; AC electricity is metered separately.",
-    "food": "Not included.",
+    "internship": "Free internship training is offered to foreign graduates who apply. No salary or honorarium is paid during the internship year.",
+    "hostel": "Included in the five-year fee; electricity for AC rooms is metered separately.",
+    "food": "Not included in the fee — mess is paid separately.",
     "payment": [],
     "notes": "This is a women-only medical college. Payment schedule to be confirmed with the college.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -285,7 +411,7 @@
     "audience": "Both (men & women)",
     "session": "2025-26",
     "feeUsd": 44000,
-    "feeIntro": "Official stated total of USD 44,000 for 5 years, with the fee breakup printed below.",
+    "feeIntro": "USD 44,000 for five years — development, admission, tuition, hostel, other fees, incidental expenses, the government fee and the clinical fee.",
     "covers": [
       "Development fee (USD 17,600)",
       "Admission fee (USD 2,000)",
@@ -297,30 +423,75 @@
       "Clinical fee (USD 2,400, payable after 1st Professional)"
     ],
     "notCovered": [
-      "Food (not specified)",
+      "Food (extra — not part of the five-year fee)",
       "Any costs beyond the listed components"
     ],
-    "internship": "A clinical fee of USD 2,400 applies and is payable after appearing in the 1st Professional examination.",
+    "internship": "A clinical fee of USD 2,400 is payable after appearing in the 1st Professional examination.",
     "hostel": "Hostel rent of USD 3,000 is included in the total.",
-    "food": "Not specified.",
+    "food": "Not included in the fee — mess is paid separately.",
     "breakdown": [
-      ["Development fee", 17600],
-      ["Admission fee", 2000],
-      ["Tuition", 13800],
-      ["Hostel rent", 3000],
-      ["Other fees", 2700],
-      ["Incidental expenses", 1500],
-      ["Government fee", 1000],
-      ["Clinical fee (payable after 1st Professional)", 2400]
+      [
+        "Development fee",
+        17600
+      ],
+      [
+        "Admission fee",
+        2000
+      ],
+      [
+        "Tuition",
+        13800
+      ],
+      [
+        "Hostel rent",
+        3000
+      ],
+      [
+        "Other fees",
+        2700
+      ],
+      [
+        "Incidental expenses",
+        1500
+      ],
+      [
+        "Government fee",
+        1000
+      ],
+      [
+        "Clinical fee (payable after 1st Professional)",
+        2400
+      ]
     ],
     "payment": [
-      ["At admission", 20000],
-      ["By August 2026", 6000],
-      ["By March 2027", 4000],
-      ["By March 2028", 4000],
-      ["By March 2029", 4000],
-      ["By March 2030", 4000],
-      ["By September 2030", 2000]
+      [
+        "At admission",
+        20000
+      ],
+      [
+        "By August 2026",
+        6000
+      ],
+      [
+        "By March 2027",
+        4000
+      ],
+      [
+        "By March 2028",
+        4000
+      ],
+      [
+        "By March 2029",
+        4000
+      ],
+      [
+        "By March 2030",
+        4000
+      ],
+      [
+        "By September 2030",
+        2000
+      ]
     ],
     "notes": "",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -336,7 +507,7 @@
     "audience": "Both (men & women)",
     "session": "2025-26",
     "feeUsd": 44500,
-    "feeIntro": "Official stated 5-year course fee with accommodation of USD 44,500.",
+    "feeIntro": "USD 44,500 for five years with accommodation. The covered components are listed below.",
     "covers": [
       "Development fee (USD 21,200)",
       "University & Ministry fee (USD 2,000)",
@@ -355,23 +526,59 @@
       "Additional charges for irregular students after five years"
     ],
     "internship": "Internship fee is excluded from the course fee.",
-    "hostel": "Accommodation of USD 4,800 included; food excluded.",
-    "food": "Excluded.",
+    "hostel": "Accommodation of USD 4,800 is included; food is excluded.",
+    "food": "Excluded from the fee — mess is paid separately.",
     "breakdown": [
-      ["Development fee", 21200],
-      ["University & Ministry fee", 2000],
-      ["Pre-clinical tuition", 4230],
-      ["Clinical tuition", 11340],
-      ["Other administrative fees", 930],
-      ["Accommodation", 4800]
+      [
+        "Development fee",
+        21200
+      ],
+      [
+        "University & Ministry fee",
+        2000
+      ],
+      [
+        "Pre-clinical tuition",
+        4230
+      ],
+      [
+        "Clinical tuition",
+        11340
+      ],
+      [
+        "Other administrative fees",
+        930
+      ],
+      [
+        "Accommodation",
+        4800
+      ]
     ],
     "payment": [
-      ["At admission", 16600],
-      ["June 2026", 3900],
-      ["January 2027", 6000],
-      ["January 2028", 6000],
-      ["January 2029", 6000],
-      ["January 2030", 6000]
+      [
+        "At admission",
+        16600
+      ],
+      [
+        "June 2026",
+        3900
+      ],
+      [
+        "January 2027",
+        6000
+      ],
+      [
+        "January 2028",
+        6000
+      ],
+      [
+        "January 2029",
+        6000
+      ],
+      [
+        "January 2030",
+        6000
+      ]
     ],
     "notes": "Irregular students may incur additional charges after five years.",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."
@@ -387,7 +594,7 @@
     "audience": "Both (men & women)",
     "session": "2025-26",
     "feeUsd": 45000,
-    "feeIntro": "Official stated total of USD 45,000 for 5 years - USD 33,000 academic fee plus USD 12,000 in hostel, food and other expenses.",
+    "feeIntro": "USD 45,000 for five years — a USD 33,000 academic fee plus USD 12,000 covering hostel, food and other expenses.",
     "covers": [
       "Academic fee (USD 33,000)",
       "Hostel / accommodation (USD 7,000)",
@@ -397,16 +604,34 @@
     "notCovered": [
       "Internship fee USD 2,000 (separate; refunded monthly during the internship year)"
     ],
-    "internship": "A separate USD 2,000 internship fee is payable during joining and is refunded during the internship year on a monthly basis.",
-    "hostel": "Hostel plus daily five-times meals included in the USD 7,000 other-expenses block.",
-    "food": "Included (5 meals a day).",
+    "internship": "A separate USD 2,000 internship fee is paid at joining and refunded in monthly instalments during the internship year.",
+    "hostel": "Hostel with five meals a day is included in the USD 7,000 expense block.",
+    "food": "Included — five meals a day.",
     "payment": [
-      ["Booking", 8000],
-      ["Joining / admission", 12500],
-      ["Within first month of 2nd year", 6000],
-      ["Within first month of 3rd year", 6000],
-      ["Within first month of 4th year", 6000],
-      ["Within first month of 5th year", 6500]
+      [
+        "Booking",
+        8000
+      ],
+      [
+        "Joining / admission",
+        12500
+      ],
+      [
+        "Within first month of 2nd year",
+        6000
+      ],
+      [
+        "Within first month of 3rd year",
+        6000
+      ],
+      [
+        "Within first month of 4th year",
+        6000
+      ],
+      [
+        "Within first month of 5th year",
+        6500
+      ]
     ],
     "notes": "",
     "eligibility": "NEET qualification is required for Indian students. A DG Health equivalence certificate is needed for admission."

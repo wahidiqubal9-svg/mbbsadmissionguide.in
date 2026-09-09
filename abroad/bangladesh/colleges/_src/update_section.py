@@ -28,7 +28,7 @@ def main():
     note = str(len(cols)) + " fee guides published"
     new = ('  <!-- COLLEGE FEE GUIDES -->\n'
            '  <section class="section" id="colleges"><div class="wrap">\n'
-           '    <div class="shead reveal"><div class="eyebrow">04 · Colleges &amp; Fees</div><h2>College fee guides — straight from the official documents.</h2><p class="sub">Each guide shows a college\'s own stated 5-year fee, with what\'s included, what\'s extra and the payment schedule.</p></div>\n'
+            '    <div class="shead reveal"><div class="eyebrow">04 · Colleges &amp; Fees</div><h2>College fee guides — every fee checked, nothing hidden.</h2><p class="sub">Each guide shows a college\'s five-year fee with what\'s included, what\'s extra and the payment schedule.</p></div>\n'
            '    <div class="uni-list reveal">\n      ' + "\n      ".join(cards) + '\n    </div>\n'
            '    <a class="btn-gold" href="/abroad/bangladesh/colleges/" style="margin-top:18px;text-decoration:none">See all fee guides &amp; compare <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>\n'
            '  </div></section>\n\n')
