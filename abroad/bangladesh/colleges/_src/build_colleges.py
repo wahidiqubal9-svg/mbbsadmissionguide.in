@@ -32,6 +32,16 @@ EXTRA_CSS = """
   .map-frame{border:1px solid var(--line);border-radius:calc(var(--r) - 4px);overflow:hidden;line-height:0}
   .map-frame iframe{width:100%;height:360px;border:0;display:block}
   .map-note{font-size:11.5px;color:var(--muted);margin:12px 2px 0;line-height:1.6}
+
+  /* Campus photo */
+  .section--campus{padding-top:0}
+  .section--campus .wrap{padding-top:0}
+  .campus-fig{margin:0 auto;max-width:1000px;border:1px solid var(--line);border-radius:calc(var(--r) - 4px);overflow:hidden;background:#fff;box-shadow:0 8px 26px rgba(11,27,43,.07)}
+  .campus-fig img{width:100%;height:auto;display:block}
+  .campus-fig figcaption{padding:8px 14px;font-size:11px;color:var(--muted);letter-spacing:.01em}
+  @media (max-width:640px){
+    .campus-fig figcaption{text-align:right}
+  }
   @media (max-width:640px){
     .map-acts{width:100%}
     .map-btn{flex:1;justify-content:center}
@@ -101,7 +111,7 @@ def hero(c):
     loc = " Located in " + c["location"] + "." if c["location"] else ""
     return ('<section class="hero hero-bd"><div class="hero-grid"><div class="hero-content">\n'
             '    <div class="bd-pill"><span class="flag-dot"></span>' + c["name"] + " · " + c["session"] + " Intake</div>\n"
-            '    <h1>MBBS at <span class="bd-highlight">' + c["short"] + "</span> — official fees, " + c["session"] + ".</h1>\n"
+            '    <h1>MBBS at <span class="bd-highlight">' + c["short"] + '</span> — fees, inclusions &amp; installments.</h1>\n'
             '    <p>' + c["feeIntro"] + loc + "</p>\n"
             '    <div class="hero-stats">'
             '<div class="stat"><b>' + usd(c["feeUsd"]) + "</b><span>5-Year Fee (USD)</span></div>"
@@ -117,7 +127,7 @@ def cost_lines(rows):
 def fee_overview(c):
     texty = {"Location", "Eligible students", "Hostel", "Food", "Internship"}
     rows = [
-        ("Official 5-year course fee", usd(c["feeUsd"]) + ' <small>(' + inr(c["feeUsd"]) + ")</small>"),
+        ("5-year course fee", usd(c["feeUsd"]) + ' <small>(' + inr(c["feeUsd"]) + ")</small>"),
         ("Intake session", c["session"]),
     ]
     if c["location"]:
@@ -133,7 +143,7 @@ def fee_overview(c):
         line_rows += '<div class="cost-line"><span class="label">' + l + "</span>" + val + "</div>\n"
     return ('<div class="cost-card reveal">\n      <h3 class="serif">Fee at a glance</h3>\n'
             + line_rows
-            + '      <div class="cost-total"><span class="label">Official stated total (5 years)</span>'
+            + '      <div class="cost-total"><span class="label">Full five-year fee</span>'
               '<span class="value">' + usd(c["feeUsd"]) + "</span></div>\n    </div>")
 
 
@@ -141,9 +151,9 @@ def breakdown(c):
     if not c.get("breakdown"):
         return ""
     rows = cost_lines([(l, usd(v)) for l, v in c["breakdown"]])
-    return ('<div class="cost-card reveal">\n      <h3 class="serif">Stated fee breakup</h3>\n'
-            '<p style="margin:4px 0 10px;font-size:12.5px;color:var(--muted)">As printed in the official fee document for the '
-            + c["session"] + " session</p>\n" + rows + "    </div>")
+    return ('<div class="cost-card reveal">\n      <h3 class="serif">Fee breakup</h3>\n'
+            '<p style="margin:4px 0 10px;font-size:12.5px;color:var(--muted)">How the '
+            + c["session"] + " intake total is split</p>\n" + rows + "    </div>")
 
 
 def payment(c):
@@ -161,14 +171,14 @@ def payment(c):
 def faq_section(c):
     items = [
         ("What is the full 5-year MBBS fee at " + c["name"] + "?",
-         "As per the college's official fee document for the " + c["session"] + " session, the stated 5-year fee is "
-         + usd(c["feeUsd"]) + " (" + inr(c["feeUsd"]) + "). Colleges define their totals differently, so always read the "
-         "\u201cIncluded\u201d and \u201cNot included / extra\u201d lists above together with the total."),
+         "The five-year fee for the " + c["session"] + " intake is "
+         + usd(c["feeUsd"]) + " (" + inr(c["feeUsd"]) + "). Colleges total their fees differently, so compare the "
+         "\u201cIncluded\u201d and \u201cNot included / extra\u201d lists above alongside the headline figure."),
     ]
     if c["payment"]:
         items.append(("Can I pay " + c["short"] + " in installments?",
-                      "Yes. The official fee document shows a staged schedule (booking / admission followed by installments). "
-                      "Confirm exact dates and any non-refundable clauses with the college before paying."))
+                      "Yes. The college takes the fee in stages \u2014 booking or admission first, then installments on the "
+                      "dates shown above. We confirm the current dates and any non-refundable clauses with the college before you pay."))
     items += [
         ("Does the fee include hostel and food?",
          "Hostel: " + c["hostel"].lower() + " Food: " + c["food"].lower()),
@@ -214,15 +224,26 @@ def map_card(c):
             '    <div class="map-frame"><iframe src="' + embed + '" width="100%" height="360" loading="lazy" '
             'allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Google map showing the campus of ' +
             name + '"></iframe></div>\n'
-            '    <p class="map-note">The pin follows the official campus listing on Google Maps (' + addr +
-            "). Coordinates are indicative &mdash; always confirm the exact building and hostel address with the college before travelling.</p>\n"
+            '    <p class="map-note">The pin marks the campus on Google Maps (' + addr +
+            "). Coordinates are indicative &mdash; confirm the exact academic and hostel address with the college before travelling.</p>\n"
             "  </div></div></section>")
 
 
+def campus_photo(c):
+    return ('<section class="section section--campus"><div class="wrap">\n'
+            '    <figure class="campus-fig reveal">\n'
+            '      <img src="campus.jpg" alt="' + c["name"] + ' campus \u2014 ' + (c["location"] or "Bangladesh") +
+            '" width="1280" height="720" loading="lazy" />\n'
+            '      <figcaption>Photo: ' + c["name"] + ' \u2014 college website</figcaption>\n'
+            '    </figure>\n'
+            '  </div></section>')
+
+
 def college_main(c):
-    disclaimer = ('<div class="note-dash">Figures are as per the college\'s official fee document for the ' + c["session"] +
-                  " session. Fees, inclusions and exclusions change — always verify the current official amount before paying.</div>")
-    html = [crumbs(c["name"]), hero(c),
+    disclaimer = ('<div class="note-dash">Fees below are for the ' + c["session"] +
+                  " intake and were checked before publishing. College fees and inclusions change \u2014 we reconfirm the current fee "
+                  "with the college before you pay.</div>")
+    html = [crumbs(c["name"]), hero(c), campus_photo(c),
             '<section class="section" id="overview"><div class="wrap">' + fee_overview(c) + disclaimer + "</div></section>"]
     m = map_card(c)
     if m:
@@ -246,7 +267,7 @@ def college_main(c):
     html.append('<section class="section" id="lead-wrap"><div class="wrap">' + lead_form(c) + "</div></section>")
     html.append(faq_section(c))
     html.append('<div class="cta-banner reveal"><h3>Speak with a <em>doctor-founder</em> about ' + c["name"] + ".</h3>"
-                '<p>Dr. Wahid &amp; Dr. Washim verify official fees and college recognition before you pay.</p>'
+                '<p>Dr. Wahid &amp; Dr. Washim reconfirm the current fee and college recognition with the college before you pay.</p>'
                 '<div class="btns"><a href="' + WA + '" class="btn-wa">WhatsApp</a>'
                 '<a href="tel:+918942954415" class="btn-call">Call Now</a></div></div>')
     return "\n\n".join(html) + "\n"
@@ -255,7 +276,7 @@ def college_main(c):
 def lead_form(c):
     return ('<div class="lead-card reveal" id="lead">\n'
             '    <h3 class="serif">Get your ' + c["short"] + ' shortlist</h3>\n'
-            '    <p>A doctor-founder will confirm the latest official fee and seat availability at <b>' + c["name"] +
+            '    <p>A doctor-founder will confirm the current fee and seat availability at <b>' + c["name"] +
             "</b>, then shortlist matching NMC-approved colleges.</p>\n"
             '    <form id="leadFormEl" onsubmit="submitLead(event)">\n'
             '      <input type="hidden" id="leadPath" value="abroad" />\n'
@@ -272,8 +293,8 @@ def lead_form(c):
 
 def write_college(c):
     path = "/abroad/bangladesh/colleges/" + c["slug"] + "/"
-    desc = ("MBBS fees at " + c["name"] + " (" + c["session"] + ") — official 5-year fee " + usd(c["feeUsd"]) + " (" + inr(c["feeUsd"]) +
-            "), with what's included, what's extra, and the payment schedule. Vetted by doctors.")
+    desc = ("MBBS fees at " + c["name"] + " (" + c["session"] + ") \u2014 five-year fee " + usd(c["feeUsd"]) + " (" + inr(c["feeUsd"]) +
+            "), with what's included, what's extra and the payment schedule. Checked by doctors.")
     title = c["name"] + " MBBS Fees " + c["session"] + " | MBBS Admission Guide"
     ld = ('{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":['
           '{"@type":"ListItem","position":1,"name":"Home","item":"' + BASE_URL + '/"},'
@@ -311,19 +332,18 @@ def index_main(cols):
                      '<div class="uni-info"><h4>#' + str(rank) + " · " + c["name"] + "</h4>"
                      '<div class="meta"><span>' + "</span><span>".join(meta) + "</span></div></div>"
                      '<div class="uni-price"><b>' + usd(c["feeUsd"]) + "</b><small>5-yr · " + inr(c["feeUsd"]) + "</small></div></a>")
-    disclaimer = ("Ranking is by the official <b>stated total</b> for the 5-year course. Because colleges define their totals "
-                  "differently (some include hostel or food, some exclude internship or registration), read each page's "
-                  "\u201cIncluded\u201d and \u201cNot included / extra\u201d lists before comparing. Figures are as per each "
-                  "college's official fee document for the stated session — always verify the current amount before paying.")
+    disclaimer = ("Ranking is by the full five-year fee. Colleges structure their totals differently \u2014 some include hostel "
+                  "or food, others exclude internship or registration \u2014 so read each page's "
+                  "\u201cIncluded\u201d and \u201cNot included / extra\u201d lists before you compare two colleges.")
     return (crumbs() + "\n\n"
             '<section class="hero hero-bd"><div class="hero-grid"><div class="hero-content">'
             '<div class="bd-pill"><span class="flag-dot"></span>Bangladesh · 2026 Intake</div>'
-            '<h1>Bangladesh MBBS <span class="bd-highlight">college fees</span> — official documents, one place.</h1>'
-            '<p>Every page below is built from the college\u2019s own published fee document — with food, hostel, internship and '
-            'installments shown honestly, and verified by doctors.</p></div></div></section>\n'
+            '<h1>Bangladesh MBBS <span class="bd-highlight">college fees</span> \u2014 verified, all in one place.</h1>'
+            '<p>Every figure below is checked by a doctor before it goes live \u2014 food, hostel, internship and '
+            'installments shown honestly.</p></div></div></section>\n'
             '<section class="section" id="list"><div class="wrap">'
-            '<div class="shead reveal"><div class="eyebrow">Official Fee Guides</div><h2>All colleges &amp; their 5-year fees.</h2>'
-            '<p class="sub">' + str(n) + ' guide' + ("s" if n != 1 else "") + ' published — more added as official documents arrive.</p></div>'
+            '<div class="shead reveal"><div class="eyebrow">Fee Guides</div><h2>All colleges &amp; their 5-year fees.</h2>'
+            '<p class="sub">' + str(n) + ' guide' + ("s" if n != 1 else "") + ' live \u2014 more added as each college is verified.</p></div>'
             '<div class="uni-list reveal">' + "".join(cards) + "</div>"
             '<div class="note-dash">' + disclaimer + "</div></div></section>\n"
             '<section class="section" id="lead-wrap"><div class="wrap">' +
@@ -351,9 +371,9 @@ def index_lead():
 
 def write_index(cols):
     path = "/abroad/bangladesh/colleges/"
-    title = "Bangladesh MBBS College Fees 2026 — Official Fee Guides | MBBS Admission Guide"
-    desc = ("Official 5-year MBBS fees for Bangladesh medical colleges — stated totals in USD and INR, hostel, food, internship "
-            "and payment schedules, from the colleges' own fee documents.")
+    title = "Bangladesh MBBS College Fees 2026 — Verified Fee Guides | MBBS Admission Guide"
+    desc = ("Five-year MBBS fees for Bangladesh medical colleges \u2014 totals in USD and INR, with hostel, food, internship "
+            "and payment schedules shown per college.")
     ld = ('{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":['
           '{"@type":"ListItem","position":1,"name":"Home","item":"' + BASE_URL + '/"},'
           '{"@type":"ListItem","position":2,"name":"MBBS Abroad","item":"' + BASE_URL + '/abroad/"},'
