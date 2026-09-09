@@ -181,13 +181,34 @@
   .cost-line .value small{font-weight:500}
   .cost-line .value.note{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;color:var(--muted);text-align:right;max-width:64%;line-height:1.5}
   .section > .wrap > .lead-card{margin-left:0;margin-right:0}
+
+  /* Campus map */
+  .map-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:2px 0 16px}
+  .map-title{display:flex;gap:11px;align-items:flex-start;min-width:0}
+  .map-title .pin{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:rgba(0,106,78,.1);border:1px solid rgba(0,106,78,.28);display:flex;align-items:center;justify-content:center;color:var(--bd-green)}
+  .map-title .pin svg{width:17px;height:17px}
+  .map-title .loc b{display:block;font-size:14px;color:var(--ink);letter-spacing:-.01em}
+  .map-title .loc span{display:block;font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:3px;max-width:520px}
+  .map-acts{display:flex;gap:8px;flex-wrap:wrap}
+  .map-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,106,78,.35);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--bd-green);background:#fff;text-decoration:none;transition:all .18s ease}
+  .map-btn svg{width:13px;height:13px}
+  .map-btn.solid{background:var(--bd-green);border-color:var(--bd-green);color:#fff}
+  .map-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,106,78,.18)}
+  .map-frame{border:1px solid var(--line);border-radius:calc(var(--r) - 4px);overflow:hidden;line-height:0}
+  .map-frame iframe{width:100%;height:360px;border:0;display:block}
+  .map-note{font-size:11.5px;color:var(--muted);margin:12px 2px 0;line-height:1.6}
+  @media (max-width:640px){
+    .map-acts{width:100%}
+    .map-btn{flex:1;justify-content:center}
+    .map-frame iframe{height:300px}
+  }
 </style>
 
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mbbsadmissionguide.in/"},{"@type":"ListItem","position":2,"name":"MBBS Abroad","item":"https://mbbsadmissionguide.in/abroad/"},{"@type":"ListItem","position":3,"name":"Bangladesh","item":"https://mbbsadmissionguide.in/abroad/bangladesh/"},{"@type":"ListItem","position":4,"name":"Colleges & Fees","item":"https://mbbsadmissionguide.in/abroad/bangladesh/colleges/"},{"@type":"ListItem","position":5,"name":"Ad-din Women's Medical College","item":"https://mbbsadmissionguide.in/abroad/bangladesh/colleges/ad-din-womens-medical-college/"}]}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Course","name":"MBBS at Ad-din Women's Medical College","description":"Official stated 5-year course fee of USD 43,000, covering admission, tuition, session and hostel.","provider":{"@type":"CollegeOrUniversity","name":"Ad-din Women's Medical College","url":"https://mbbsadmissionguide.in/abroad/bangladesh/colleges/ad-din-womens-medical-college/"}}
+{"@context":"https://schema.org","@type":"Course","name":"MBBS at Ad-din Women's Medical College","description":"Official stated 5-year course fee of USD 43,000, covering admission, tuition, session and hostel.","provider":{"@type":"CollegeOrUniversity","name":"Ad-din Women's Medical College","url":"https://mbbsadmissionguide.in/abroad/bangladesh/colleges/ad-din-womens-medical-college/","address":{"@type":"PostalAddress","streetAddress":"Bara Maghbazar (Wireless), Dhaka, Bangladesh","addressCountry":"BD"},"geo":{"@type":"GeoCoordinates","latitude":23.7485,"longitude":90.4056},"hasMap":"https://maps.google.com/?q=23.748500,90.405600"}}
 </script>
 </head>
 <body data-page="abroad">
@@ -335,6 +356,15 @@
 <div class="cost-line"><span class="label">Internship</span><span class="value note">Free internship training is available for foreign graduates who apply.</span></div>
       <div class="cost-total"><span class="label">Official stated total (5 years)</span><span class="value">$43,000</span></div>
     </div><div class="note-dash">Figures are as per the college's official fee document for the 2025-26 session. Fees, inclusions and exclusions change — always verify the current official amount before paying.</div></div></section>
+
+<section class="section" id="location"><div class="wrap"><div class="cost-card reveal map-card">
+    <h3 class="serif">Campus on the map</h3>
+    <div class="map-head">
+      <div class="map-title"><span class="pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="loc"><b>Ad-din Women's Medical College</b><span>Bara Maghbazar (Wireless), Dhaka, Bangladesh</span></span></div>
+      <div class="map-acts"><a class="map-btn solid" href="https://www.google.com/maps/dir/?api=1&amp;destination=23.748500,90.405600" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Directions</a><a class="map-btn" href="https://maps.google.com/?q=23.748500,90.405600" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3.2 7.9-7 9-3.8-1.1-7-4.6-7-9V6l7-3z"/><path d="M10 12l1.5 1.5L14 10"/></svg>Open in Google Maps</a></div></div>
+    <div class="map-frame"><iframe src="https://maps.google.com/maps?q=23.748500,90.405600&amp;z=15&amp;hl=en&amp;output=embed" width="100%" height="360" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Google map showing the campus of Ad-din Women's Medical College"></iframe></div>
+    <p class="map-note">The pin follows the official campus listing on Google Maps (Bara Maghbazar (Wireless), Dhaka, Bangladesh). Coordinates are indicative &mdash; always confirm the exact building and hostel address with the college before travelling.</p>
+  </div></div></section>
 
 <section class="section" id="inclusions"><div class="wrap"><div class="card-grid bd"><div class="cost-card reveal"><h3 class="serif">Included in the fee</h3><ul class="doc-chips"><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Admission fee</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Tuition fee</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Session fee</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Hostel fee</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Free internship training (on application)</li></ul></div><div class="cost-card reveal"><h3 class="serif">Not included / extra</h3><ul class="doc-chips alt"><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Food (not included)</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Utility bill (approx. USD 30/month)</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Electricity for AC rooms (charged on actual meter usage)</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Hostel security USD 250 (non-refundable)</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>BM&DC and University of Dhaka registration fees</li><li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>VAT where applicable</li></ul></div></div></div></section>
 

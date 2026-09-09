@@ -16,6 +16,27 @@ EXTRA_CSS = """
   .cost-line .value small{font-weight:500}
   .cost-line .value.note{font-family:'Manrope',sans-serif;font-size:12.5px;font-weight:500;color:var(--muted);text-align:right;max-width:64%;line-height:1.5}
   .section > .wrap > .lead-card{margin-left:0;margin-right:0}
+
+  /* Campus map */
+  .map-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:2px 0 16px}
+  .map-title{display:flex;gap:11px;align-items:flex-start;min-width:0}
+  .map-title .pin{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:rgba(0,106,78,.1);border:1px solid rgba(0,106,78,.28);display:flex;align-items:center;justify-content:center;color:var(--bd-green)}
+  .map-title .pin svg{width:17px;height:17px}
+  .map-title .loc b{display:block;font-size:14px;color:var(--ink);letter-spacing:-.01em}
+  .map-title .loc span{display:block;font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:3px;max-width:520px}
+  .map-acts{display:flex;gap:8px;flex-wrap:wrap}
+  .map-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,106,78,.35);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--bd-green);background:#fff;text-decoration:none;transition:all .18s ease}
+  .map-btn svg{width:13px;height:13px}
+  .map-btn.solid{background:var(--bd-green);border-color:var(--bd-green);color:#fff}
+  .map-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,106,78,.18)}
+  .map-frame{border:1px solid var(--line);border-radius:calc(var(--r) - 4px);overflow:hidden;line-height:0}
+  .map-frame iframe{width:100%;height:360px;border:0;display:block}
+  .map-note{font-size:11.5px;color:var(--muted);margin:12px 2px 0;line-height:1.6}
+  @media (max-width:640px){
+    .map-acts{width:100%}
+    .map-btn{flex:1;justify-content:center}
+    .map-frame iframe{height:300px}
+  }
 """
 
 
@@ -165,11 +186,47 @@ def faq_section(c):
             '    <div class="faq-list reveal">' + lis + "</div>\n  </div></section>")
 
 
+def map_card(c):
+    if not (c.get("lat") and c.get("lng")):
+        return ""
+    lat, lng = c["lat"], c["lng"]
+    q = "{:.6f},{:.6f}".format(lat, lng)
+    addr = c.get("address") or c["location"]
+    embed = ("https://maps.google.com/maps?q=" + q + "&amp;z=15&amp;hl=en&amp;output=embed")
+    view = "https://maps.google.com/?q=" + q
+    direc = "https://www.google.com/maps/dir/?api=1&amp;destination=" + q
+    pin = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+           '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>')
+    nav = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+           '<path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>')
+    out = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+           '<path d="M12 3l7 3v5c0 4.4-3.2 7.9-7 9-3.8-1.1-7-4.6-7-9V6l7-3z"/><path d="M10 12l1.5 1.5L14 10"/></svg>')
+    name = c["name"]
+    return ('<section class="section" id="location"><div class="wrap"><div class="cost-card reveal map-card">\n'
+            '    <h3 class="serif">Campus on the map</h3>\n'
+            '    <div class="map-head">\n'
+            '      <div class="map-title"><span class="pin">' + pin + '</span><span class="loc"><b>' + name +
+            "</b><span>" + addr + "</span></span></div>\n"
+            '      <div class="map-acts">'
+            '<a class="map-btn solid" href="' + direc + '" target="_blank" rel="noopener">' + nav + "Directions</a>"
+            '<a class="map-btn" href="' + view + '" target="_blank" rel="noopener">' + out + "Open in Google Maps</a>"
+            "</div></div>\n"
+            '    <div class="map-frame"><iframe src="' + embed + '" width="100%" height="360" loading="lazy" '
+            'allowfullscreen referrerpolicy="no-referrer-when-downgrade" title="Google map showing the campus of ' +
+            name + '"></iframe></div>\n'
+            '    <p class="map-note">The pin follows the official campus listing on Google Maps (' + addr +
+            "). Coordinates are indicative &mdash; always confirm the exact building and hostel address with the college before travelling.</p>\n"
+            "  </div></div></section>")
+
+
 def college_main(c):
     disclaimer = ('<div class="note-dash">Figures are as per the college\'s official fee document for the ' + c["session"] +
                   " session. Fees, inclusions and exclusions change — always verify the current official amount before paying.</div>")
     html = [crumbs(c["name"]), hero(c),
             '<section class="section" id="overview"><div class="wrap">' + fee_overview(c) + disclaimer + "</div></section>"]
+    m = map_card(c)
+    if m:
+        html.append(m)
     if c.get("breakdown"):
         html.append('<section class="section" id="breakdown"><div class="wrap">' + breakdown(c) + "</div></section>")
     if c.get("payment"):
@@ -226,8 +283,14 @@ def write_college(c):
           '{"@type":"ListItem","position":5,"name":"' + c["name"].replace('"', "'") + '","item":"' + BASE_URL + path + '"}]}\n'
           '</script>\n<script type="application/ld+json">\n'
           '{"@context":"https://schema.org","@type":"Course","name":"MBBS at ' + c["name"] + '","description":"' +
-          strip_tags(c["feeIntro"]) + '","provider":{"@type":"CollegeOrUniversity","name":"' + c["name"] +
-          '","url":"' + BASE_URL + path + '"}}')
+          strip_tags(c["feeIntro"]) + '","provider":')
+    prov = '{"@type":"CollegeOrUniversity","name":' + json.dumps(c["name"]) + ',"url":"' + BASE_URL + path + '"'
+    if c.get("lat") and c.get("lng"):
+        q = "{:.6f},{:.6f}".format(c["lat"], c["lng"])
+        prov += (',"address":{"@type":"PostalAddress","streetAddress":' + json.dumps(c.get("address") or c["location"]) +
+                 ',"addressCountry":"BD"},"geo":{"@type":"GeoCoordinates","latitude":' + str(c["lat"]) +
+                 ',"longitude":' + str(c["lng"]) + '},"hasMap":"https://maps.google.com/?q=' + q + '"')
+    ld += prov + "}}"
     html = build_shell(college_main(c), title, desc, BASE_URL + path, ld)
     out = os.path.join(OUT, c["slug"], "index.html")
     os.makedirs(os.path.dirname(out), exist_ok=True)
