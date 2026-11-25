@@ -76,6 +76,12 @@ def build(src: Path) -> dict:
     head = re.sub(r"<title>.*?</title>", f"<title>{meta['title']}</title>", head, count=1, flags=re.S)
     head = re.sub(r'<meta name="description" content="[^"]*"', f'<meta name="description" content="{meta["desc"]}"', head, count=1)
     head = re.sub(r'<link rel="canonical" href="[^"]*"', f'<link rel="canonical" href="{SITE}{path}"', head, count=1)
+    for prop, tag in (("og:title", "property"), ("og:description", "property"), ("og:url", "property"),
+                      ("twitter:title", "name"), ("twitter:description", "name")):
+        val = {"og:title": meta["title"], "twitter:title": meta["title"],
+               "og:description": meta["desc"], "twitter:description": meta["desc"],
+               "og:url": SITE + path}[prop]
+        head = re.sub(rf'<meta {tag}="{prop}" content="[^"]*"', f'<meta {tag}="{prop}" content="{val}"', head, count=1)
     extra = ""
     if meta.get("noindex"):
         extra += '\n<meta name="robots" content="noindex,follow" />'
