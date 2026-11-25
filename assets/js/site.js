@@ -26,7 +26,7 @@ function closeDrawer(){ const d=document.getElementById('drawer'); if(d)d.classL
 function toggleAcc(btn){ btn.parentElement.classList.toggle('open'); }
 
 /* ───── LEAD FORM ───── */
-const API_ENDPOINT='https://mbbsadmissionguide-in.wahidiqubal9.workers.dev/api/lead';
+const API_ENDPOINT='/api/lead';
 let currentPath='india';
 function setPath(p){
   currentPath=p;
