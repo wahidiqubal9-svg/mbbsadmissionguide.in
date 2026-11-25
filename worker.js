@@ -195,10 +195,7 @@ export default {
             parse_mode: 'HTML',
             disable_web_page_preview: true,
             reply_markup: {
-              inline_keyboard: [[
-                { text: '📞 Call', url: `tel:+91${phone}` },
-                { text: '💬 WhatsApp', url: waLink }
-              ]]
+              inline_keyboard: [[{ text: '💬 WhatsApp', url: waLink }]]
             }
           })
         });
@@ -206,7 +203,15 @@ export default {
 
         if (!telegramResponse.ok || !telegramData.ok) {
           console.error('Telegram API error:', telegramData?.description || telegramResponse.status);
-          return json({ ok: false, error: 'Unable to send your request right now.' }, 502);
+          // retry plain: markup or parse_mode problems must never lose a lead
+          const plain = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: message.replace(/<a href="([^"]+)">([^<]*)<\/a>/g, '$2 $1').replace(/<[^>]+>/g, ''), disable_web_page_preview: true })
+          }).catch(() => null);
+          if (!plain || !plain.ok) {
+            return json({ ok: false, error: 'Unable to send your request right now.' }, 502);
+          }
         }
         return json({ ok: true, score, dup: isDup, id: saved?.id || null });
       } catch (error) {
