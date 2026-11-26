@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counseling for India and abroad, founded by doctors.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":[{"@type":"Person","name":"Dr. Wahid Iqubal"},{"@type":"Person","name":"Dr. Washim Akram"}]}
+{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counselling for India, Bangladesh and Russia, founded by a doctor and run with partner doctors who studied in each country.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":{"@type":"Person","name":"Dr. Wahid Iqubal","jobTitle":"Founder","alumniOf":{"@type":"CollegeOrUniversity","name":"College of Medicine & Sagore Dutta Hospital, Kolkata"}},"member":[{"@type":"Person","name":"Dr. Washim Akram","jobTitle":"Partner doctor, Bangladesh","alumniOf":{"@type":"CollegeOrUniversity","name":"Barind Medical College, Rajshahi"}},{"@type":"Person","name":"Dr. Imtiyaz Ahmed","jobTitle":"Partner doctor, Russia","description":"MBBS, Russia. Cleared FMGE."}]}
 </script>
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="MBBS Admission Guide" />
@@ -159,16 +159,16 @@
   <section class="hero"><div class="hero-grid"><div class="hero-content">
     <div class="eyebrow">MBBS Admissions · 2026 Intake</div>
     <h1>Your white coat, <em>our mission.</em> MBBS in India or abroad — guided by doctors.</h1>
-    <p>India's only MBBS counseling service founded by doctors. Government seats, private colleges, NRI quota, or NMC-recognized universities abroad — one honest team, end to end.</p>
-    <div class="hero-stats"><div class="stat"><b>15,000+</b><span>Students Guided</span></div><div class="stat"><b>2 Paths</b><span>India & Abroad</span></div><div class="stat"><b>98%</b><span>Success Rate</span></div></div>
+    <p>An MBBS counselling service founded by doctors. Government seats, private colleges, NRI quota, or NMC-listed universities abroad — one honest team, end to end.</p>
+    <div class="hero-stats"><div class="stat"><b>3</b><span>Partner doctors</span></div><div class="stat"><b>3</b><span>Countries covered</span></div><div class="stat"><b>10+</b><span>Colleges, fees verified</span></div></div>
   </div></div></section>
 
   <div class="path-row reveal" id="paths">
     <a href="/india/" class="path-card india"><div class="path-flag">🇮🇳</div><h3>MBBS in <em>India</em></h3><p>Government & private medical colleges through NEET UG counseling — MCC, state quotas, deemed universities, and NRI seats.</p><div class="path-tags"><span class="path-tag">NEET UG</span><span class="path-tag accent">AIQ + State</span><span class="path-tag">Deemed</span><span class="path-tag">NRI</span></div><div class="path-cta"><span class="meta">NEET Required</span><span class="go">Explore India <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div></a>
-    <a href="/abroad/" class="path-card abroad"><div class="path-flag">✈️</div><h3>MBBS <em>Abroad</em></h3><p>NMC-recognized universities in Bangladesh, Russia, Georgia & more. Transparent fees, English medium, highest FMGE pass rates.</p><div class="path-tags"><span class="path-tag">NMC Approved</span><span class="path-tag accent">WHO Listed</span><span class="path-tag">FMGE Friendly</span></div><div class="path-cta"><span class="meta">7 Destinations</span><span class="go">Explore Abroad <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div></a>
+    <a href="/abroad/" class="path-card abroad"><div class="path-flag">✈️</div><h3>MBBS <em>Abroad</em></h3><p>NMC-listed universities in Bangladesh, Russia, Georgia & more. Transparent fees, English medium, reported FMGE results.</p><div class="path-tags"><span class="path-tag">NMC-Listed</span><span class="path-tag accent">WHO Listed</span><span class="path-tag">FMGE Friendly</span></div><div class="path-cta"><span class="meta">7 Destinations</span><span class="go">Explore Abroad <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></div></a>
   </div>
 
-  <div class="trust-strip"><span>NMC Recognized <i>·</i></span><span>WHO Listed <i>·</i></span><span>Doctor Founded <i>·</i></span><span>100% In-House</span></div>
+  <div class="trust-strip"><span>NMC-Listed <i>·</i></span><span>WHO Listed <i>·</i></span><span>Doctor Founded <i>·</i></span><span>100% In-House</span></div>
 
   <section class="section" id="why"><div class="wrap">
     <div class="shead reveal"><div class="eyebrow">01 · Why We Exist</div><h2>Not agents. Physicians who've walked your path.</h2></div>
@@ -193,6 +193,7 @@
       <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{10}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
       <div id="indiaFields"><div class="form-row two"><select id="indiaPath"><option value="">Prefer</option><option>Govt College</option><option>Private College</option><option>Deemed University</option><option>NRI Quota</option><option>Not Sure</option></select><select id="indiaScore"><option value="">NEET Score</option><option>Below 400</option><option>400 – 500</option><option>500 – 600</option><option>600 – 650</option><option>650+</option></select></div></div>
       <div id="abroadFields" style="display:none"><div class="form-row two"><select id="countrySelect"><option value="">Preferred Country</option><option>Bangladesh</option><option>Russia</option><option>Georgia</option><option>Kazakhstan</option><option>Uzbekistan</option><option>Philippines</option><option>Not Sure</option></select><select id="leadBudget"><option value="">Budget (₹/yr)</option><option>Under 3 Lakh</option><option>3 – 5 Lakh</option><option>5 – 8 Lakh</option><option>Above 8 Lakh</option></select></div></div>
+      <label class="consent"><input type="checkbox" id="leadConsent" required /> <span>I agree to be contacted by phone or WhatsApp about MBBS admission, including by our partner doctors. <a href="/privacy/">Privacy</a></span></label>
       <button type="submit" class="btn-gold" id="leadSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Request Free Counseling</button>
       <div class="form-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Confidential · Handled by our doctors</div>
     </form>
@@ -207,8 +208,8 @@
 
   <!-- ═══ STATIC FOOTER ═══ -->
   <footer class="footer"><div class="footer-inner"><div class="footer-grid">
-    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal & Dr. Washim Akram. MBBS counseling for India and NMC-recognized universities abroad.</p>
-      <div class="badges"><div class="badge">NMC Recognized</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
+    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal, with partner doctors in Bangladesh (Dr. Washim Akram) and Russia (Dr. Imtiyaz Ahmed).</p>
+      <div class="badges"><div class="badge">NMC-Listed</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
     <div class="footer-cols">
       <div class="footer-col"><h6>MBBS Abroad</h6><ul><li><a href="/abroad/">Overview</a></li><li><a href="/abroad/bangladesh/">Bangladesh</a></li><li><a href="/abroad/russia/">Russia</a></li><li><a href="/abroad/georgia/">Georgia</a></li><li><a href="/abroad/kazakhstan/">Kazakhstan</a></li></ul></div>
       <div class="footer-col"><h6>MBBS India</h6><ul><li><a href="/india/">Overview</a></li><li><a href="/india/#aiq">NEET UG / AIQ</a></li><li><a href="/india/#state">State Counseling</a></li><li><a href="/india/#deemed">Deemed</a></li><li><a href="/india/#nri">NRI Quota</a></li></ul></div>

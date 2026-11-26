@@ -39,7 +39,8 @@ LEAD_BLOCK = """  <div class="lead-card reveal" id="lead">
       <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{{10}}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
       <div id="indiaFields"><div class="form-row two"><select id="indiaPath"><option value="">Prefer</option><option>Govt College</option><option>Private College</option><option>Deemed University</option><option>NRI Quota</option><option>Not Sure</option></select><select id="indiaScore"><option value="">NEET Score</option><option>Below 400</option><option>400 – 500</option><option>500 – 600</option><option>600 – 650</option><option>650+</option></select></div></div>
       <div id="abroadFields" style="display:none"><div class="form-row two"><select id="countrySelect"><option value="">Preferred Country</option><option>Bangladesh</option><option>Russia</option><option>Georgia</option><option>Kazakhstan</option><option>Uzbekistan</option><option>Philippines</option><option>Not Sure</option></select><select id="leadBudget"><option value="">Budget (₹/yr)</option><option>Under 3 Lakh</option><option>3 – 5 Lakh</option><option>5 – 8 Lakh</option><option>Above 8 Lakh</option></select></div></div>
-      <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
+<label class="consent"><input type="checkbox" id="leadConsent" required /> <span>I agree to be contacted by phone or WhatsApp about MBBS admission, including by our partner doctors. <a href="/privacy/">Privacy</a></span></label>
+            <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
       <div class="form-trust">Confidential · Handled by our doctors</div>
     </form>
   </div>
