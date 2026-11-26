@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counseling for India and abroad, founded by doctors.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":[{"@type":"Person","name":"Dr. Wahid Iqubal"},{"@type":"Person","name":"Dr. Washim Akram"}]}
+{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counselling for India, Bangladesh and Russia, founded by a doctor and run with partner doctors who studied in each country.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":{"@type":"Person","name":"Dr. Wahid Iqubal","jobTitle":"Founder","alumniOf":{"@type":"CollegeOrUniversity","name":"College of Medicine & Sagore Dutta Hospital, Kolkata"}},"member":[{"@type":"Person","name":"Dr. Washim Akram","jobTitle":"Partner doctor, Bangladesh","alumniOf":{"@type":"CollegeOrUniversity","name":"Barind Medical College, Rajshahi"}},{"@type":"Person","name":"Dr. Imtiyaz Ahmed","jobTitle":"Partner doctor, Russia","description":"MBBS, Russia. Cleared FMGE."}]}
 </script>
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="MBBS Admission Guide" />
@@ -169,15 +169,26 @@
     <div class="faq-list reveal">
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">One team, start to finish<span class="chev">+</span></div><div class="faq-a">Calls, documents, university correspondence, visas and arrival support are handled in-house. No lead resale, no handover to a call centre.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Written numbers<span class="chev">+</span></div><div class="faq-a">Fees, inclusions and refund rules come in writing before any payment. We reconfirm current figures with the university for your intake.</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">No guaranteed seats<span class="chev">+</span></div><div class="faq-a">We quote last year's closing ranks and tell you the score bands where you do not stand a chance. Counselling is guidance, not a promise.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Our seat commitment<span class="chev">+</span></div><div class="faq-a">We take on a student only when the NEET score, category and budget give a realistic seat in a college we list. If they do not, we say so on the first call and <b>we do not take your deposit</b>. If we take the case and cannot place you, your ₹10,000 caution deposit is refunded in full. That is a promise about our service — not a claim that anyone can guarantee a seat before counselling allotments.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What it costs<span class="chev">+</span></div><div class="faq-a">Counselling, shortlisting, document checks and college correspondence are free. When you confirm you want to proceed we take a <b>₹10,000 caution deposit</b> — refundable, and adjusted against your first payment to the college. Nothing else is charged by us.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">NMC-first checks<span class="chev">+</span></div><div class="faq-a">For every foreign university we verify the NMC recognised-institutions list for your admission year before recommending it, and screenshot the check.</div></div>
     </div>
   </div></section>
 
+
+  <section class="section"><div class="wrap">
+    <div class="shead reveal"><div class="eyebrow">The doctors</div><h2>Three doctors. Three countries.</h2></div>
+    <div class="card-grid four">
+      <div class="info-card"><h4>Dr. Wahid Iqubal</h4><p>MBBS, College of Medicine &amp; Sagore Dutta Hospital, Kolkata. Leads every India enquiry and the first call on every lead.</p></div>
+      <div class="info-card"><h4>Dr. Washim Akram</h4><p>MBBS, Barind Medical College, Rajshahi, Bangladesh. FMGE cleared. Handles Bangladesh admissions end to end.</p></div>
+      <div class="info-card"><h4>Dr. Imtiyaz Ahmed</h4><p>MBBS, Russia. FMGE cleared. Handles Russia admissions and the FMGE reality check nobody else gives you.</p></div>
+      <div class="info-card"><h4>Why it matters</h4><p>Each country guide on this site is written by the doctor who studied there — not by a copywriter reading someone else's brochure.</p></div>
+    </div>
+  </div></section>
   <section class="section"><div class="wrap">
     <div class="shead reveal"><div class="eyebrow">Disclosure</div><h2>How we earn.</h2></div>
     <div class="faq-list reveal">
-      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Fees<span class="chev">+</span></div><div class="faq-a">Our counselling is free for students. We are paid by partner universities when an admission completes, and the fee you pay the university is the same either way. We say upfront when a country or college pays us nothing.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Fees<span class="chev">+</span></div><div class="faq-a">Counselling is free. A ₹10,000 refundable caution deposit applies once you confirm, adjusted against your first college payment. The college fee you pay is the college's published fee — we do not mark it up.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">India counselling<span class="chev">+</span></div><div class="faq-a">Choice-filling guidance for MCC and state rounds is a paid service, priced before we begin.</div></div>
     </div>
   </div></section>
@@ -195,7 +206,8 @@
       <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{10}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
       <div id="indiaFields"><div class="form-row two"><select id="indiaPath"><option value="">Prefer</option><option>Govt College</option><option>Private College</option><option>Deemed University</option><option>NRI Quota</option><option>Not Sure</option></select><select id="indiaScore"><option value="">NEET Score</option><option>Below 400</option><option>400 – 500</option><option>500 – 600</option><option>600 – 650</option><option>650+</option></select></div></div>
       <div id="abroadFields" style="display:none"><div class="form-row two"><select id="countrySelect"><option value="">Preferred Country</option><option>Bangladesh</option><option>Russia</option><option>Georgia</option><option>Kazakhstan</option><option>Uzbekistan</option><option>Philippines</option><option>Not Sure</option></select><select id="leadBudget"><option value="">Budget (₹/yr)</option><option>Under 3 Lakh</option><option>3 – 5 Lakh</option><option>5 – 8 Lakh</option><option>Above 8 Lakh</option></select></div></div>
-      <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
+<label class="consent"><input type="checkbox" id="leadConsent" required /> <span>I agree to be contacted by phone or WhatsApp about MBBS admission, including by our partner doctors. <a href="/privacy/">Privacy</a></span></label>
+            <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
       <div class="form-trust">Confidential · Handled by our doctors</div>
     </form>
   </div>
@@ -209,8 +221,8 @@
 
 <!-- ═══ STATIC FOOTER ═══ -->
   <footer class="footer"><div class="footer-inner"><div class="footer-grid">
-    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal & Dr. Washim Akram. MBBS counseling for India and NMC-recognized universities abroad.</p>
-      <div class="badges"><div class="badge">NMC Recognized</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
+    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal, with partner doctors in Bangladesh (Dr. Washim Akram) and Russia (Dr. Imtiyaz Ahmed).</p>
+      <div class="badges"><div class="badge">NMC-Listed</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
     <div class="footer-cols">
       <div class="footer-col"><h6>MBBS Abroad</h6><ul><li><a href="/abroad/">Overview</a></li><li><a href="/abroad/bangladesh/">Bangladesh</a></li><li><a href="/abroad/russia/">Russia</a></li><li><a href="/abroad/georgia/">Georgia</a></li><li><a href="/abroad/kazakhstan/">Kazakhstan</a></li></ul></div>
       <div class="footer-col"><h6>MBBS India</h6><ul><li><a href="/india/">Overview</a></li><li><a href="/india/#aiq">NEET UG / AIQ</a></li><li><a href="/india/#state">State Counseling</a></li><li><a href="/india/#deemed">Deemed</a></li><li><a href="/india/#nri">NRI Quota</a></li></ul></div>

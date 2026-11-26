@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counseling for India and abroad, founded by doctors.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":[{"@type":"Person","name":"Dr. Wahid Iqubal"},{"@type":"Person","name":"Dr. Washim Akram"}]}
+{"@context":"https://schema.org","@type":"EducationalOrganization","name":"MBBS Admission Guide","description":"MBBS counselling for India, Bangladesh and Russia, founded by a doctor and run with partner doctors who studied in each country.","url":"https://mbbsadmissionguide.in/","telephone":"+918942954415","founder":{"@type":"Person","name":"Dr. Wahid Iqubal","jobTitle":"Founder","alumniOf":{"@type":"CollegeOrUniversity","name":"College of Medicine & Sagore Dutta Hospital, Kolkata"}},"member":[{"@type":"Person","name":"Dr. Washim Akram","jobTitle":"Partner doctor, Bangladesh","alumniOf":{"@type":"CollegeOrUniversity","name":"Barind Medical College, Rajshahi"}},{"@type":"Person","name":"Dr. Imtiyaz Ahmed","jobTitle":"Partner doctor, Russia","description":"MBBS, Russia. Cleared FMGE."}]}
 </script>
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="MBBS Admission Guide" />
@@ -196,6 +196,15 @@
     </div>
   </div></section>
 
+  <section class="section"><div class="wrap">
+    <div class="shead reveal"><div class="eyebrow">Universities · 2027</div><h2>Which Georgia universities we publish — and why some are missing.</h2></div>
+    <p class="note-dash">We publish a university page only after three checks pass: its NMC listing for your admission year, the current fee confirmed in writing by the university, and hostel and mess costs confirmed by students actually studying there. The Georgia shortlist for 2027 is still in verification, so we are not listing names we cannot stand behind.</p>
+    <div class="faq-list reveal">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What we are checking right now<span class="chev">+</span></div><div class="faq-a">NMC listing status for the 2027 admission year · official fee letter per year including hostel · internship placement in the same institute · FMGE results for the university's own Indian graduates, not the country average.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I get the shortlist before pages go live?<span class="chev">+</span></div><div class="faq-a">Yes. Message us and we will send the Georgia universities currently under verification, with the checks still outstanding on each one, so you know exactly what is confirmed and what is not.</div></div>
+    </div>
+  </div></section>
+
     <div class="lead-card reveal" id="lead">
     <h3 class="serif">Free counseling — talk to a doctor, not an agent</h3>
     <p>Honest eligibility check on WhatsApp or a call within 15 minutes.</p>
@@ -209,7 +218,8 @@
       <div class="form-row two"><input type="tel" class="input" id="leadPhone" placeholder="Mobile No. *" pattern="[0-9]{10}" maxlength="10" required /><select id="leadNeet" required><option value="">NEET Status</option><option>Qualified</option><option>Appearing 2026</option><option>Not Appeared</option></select></div>
       <div id="indiaFields"><div class="form-row two"><select id="indiaPath"><option value="">Prefer</option><option>Govt College</option><option>Private College</option><option>Deemed University</option><option>NRI Quota</option><option>Not Sure</option></select><select id="indiaScore"><option value="">NEET Score</option><option>Below 400</option><option>400 – 500</option><option>500 – 600</option><option>600 – 650</option><option>650+</option></select></div></div>
       <div id="abroadFields" style="display:none"><div class="form-row two"><select id="countrySelect"><option value="">Preferred Country</option><option>Bangladesh</option><option>Russia</option><option>Georgia</option><option>Kazakhstan</option><option>Uzbekistan</option><option>Philippines</option><option>Not Sure</option></select><select id="leadBudget"><option value="">Budget (₹/yr)</option><option>Under 3 Lakh</option><option>3 – 5 Lakh</option><option>5 – 8 Lakh</option><option>Above 8 Lakh</option></select></div></div>
-      <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
+<label class="consent"><input type="checkbox" id="leadConsent" required /> <span>I agree to be contacted by phone or WhatsApp about MBBS admission, including by our partner doctors. <a href="/privacy/">Privacy</a></span></label>
+            <button type="submit" class="btn-gold" id="leadSubmitBtn">Request Free Counseling</button>
       <div class="form-trust">Confidential · Handled by our doctors</div>
     </form>
   </div>
@@ -223,8 +233,8 @@
 
 <!-- ═══ STATIC FOOTER ═══ -->
   <footer class="footer"><div class="footer-inner"><div class="footer-grid">
-    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal & Dr. Washim Akram. MBBS counseling for India and NMC-recognized universities abroad.</p>
-      <div class="badges"><div class="badge">NMC Recognized</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
+    <div class="footer-brand"><h5>MBBS Admission Guide</h5><p class="footer-tag">Founded by Dr. Wahid Iqubal, with partner doctors in Bangladesh (Dr. Washim Akram) and Russia (Dr. Imtiyaz Ahmed).</p>
+      <div class="badges"><div class="badge">NMC-Listed</div><div class="badge">WHO Listed</div><div class="badge">Doctor Founded</div><div class="badge">100% In-House</div></div></div>
     <div class="footer-cols">
       <div class="footer-col"><h6>MBBS Abroad</h6><ul><li><a href="/abroad/">Overview</a></li><li><a href="/abroad/bangladesh/">Bangladesh</a></li><li><a href="/abroad/russia/">Russia</a></li><li><a href="/abroad/georgia/">Georgia</a></li><li><a href="/abroad/kazakhstan/">Kazakhstan</a></li></ul></div>
       <div class="footer-col"><h6>MBBS India</h6><ul><li><a href="/india/">Overview</a></li><li><a href="/india/#aiq">NEET UG / AIQ</a></li><li><a href="/india/#state">State Counseling</a></li><li><a href="/india/#deemed">Deemed</a></li><li><a href="/india/#nri">NRI Quota</a></li></ul></div>
